@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Le Pendu Mobile</title>
 <style>
 :root {
   --bg: #0f0c1a; --accent: #e8ff47; --accent2: #ff4757; --accent3: #48dbfb;
@@ -10,59 +11,39 @@
 }
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
-/* Utilisation de dvh pour Android pour éviter les sauts d'écran */
 html, body { 
-  height: 100dvh; 
-  background: var(--bg); 
-  color: var(--text); 
-  font-family: sans-serif; 
-  overflow: hidden; 
-  position: fixed; 
-  width: 100%;
+  height: 100dvh; background: var(--bg); color: var(--text); 
+  font-family: sans-serif; overflow: hidden; position: fixed; width: 100%;
 }
 
 .app { 
-  height: 100dvh; 
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  padding: 10px 15px; 
-  max-width: 480px; 
-  margin: 0 auto; 
+  height: 100dvh; display: flex; flex-direction: column; align-items: center; 
+  padding: 10px 15px; max-width: 480px; margin: 0 auto; 
 }
 
-/* Potence : on garde la taille mais on permet au flex de la réduire si besoin sur petit écran */
 .gallows-wrap { 
-  width:100%; 
-  display:flex; 
-  justify-content:center; 
-  margin-bottom:10px; 
-  flex-shrink: 1; 
-  min-height: 120px;
+  width:100%; display:flex; justify-content:center; margin-bottom:10px; 
+  flex-shrink: 1; min-height: 120px;
 }
 #gallows-svg { width:180px; height:130px; }
 
 .word-display { 
-  display:flex; 
-  gap:6px; 
-  justify-content:center; 
-  margin-bottom:15px; 
-  min-height:40px; 
-  flex-shrink: 0;
+  display:flex; gap:6px; justify-content:center; margin-bottom:15px; 
+  min-height:40px; flex-shrink: 0;
 }
 .letter-slot { display:flex; flex-direction:column; align-items:center; }
 .letter-char { font-size:1.6rem; min-width:22px; text-align:center; height: 30px; font-weight: bold; }
 .letter-line { height:2px; background:rgba(255,255,255,0.2); width:22px; }
 .letter-line.revealed { background:var(--accent); box-shadow: 0 0 8px var(--accent); }
 
-/* CONTENEUR BAS : CLAVIER PUIS BOUTONS EN DESSOUS */
+/* ZONE BASSE : CLAVIER + BOUTONS DESSOUS */
 .bottom-container {
-  margin-top: auto; /* Pousse tout le bloc vers le bas */
+  margin-top: auto;
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 15px; /* Espace entre clavier et boutons */
-  padding-bottom: env(safe-area-inset-bottom, 20px); /* Gère la barre Android */
+  gap: 20px; 
+  padding-bottom: 30px; 
 }
 
 .keyboard { display:flex; flex-direction:column; gap:6px; }
@@ -71,19 +52,17 @@ html, body {
   background:var(--card); border:1px solid var(--border); color:var(--text); 
   width:34px; height:44px; border-radius:6px; display:flex; 
   align-items:center; justify-content:center; font-size: 0.9rem;
-  touch-action: manipulation;
 }
 .key.correct { color:var(--accent); border-color:var(--accent); background: rgba(232,255,71,0.1); }
 .key.wrong { opacity: 0.15; }
 
 .audio-row { display: flex; justify-content: center; gap: 12px; }
 .audio-btn { 
-  background: rgba(232,255,71,0.05); border: 1px solid rgba(232,255,71,0.3); 
+  background: rgba(232,255,71,0.05); border: 1px solid var(--accent); 
   color: var(--accent); padding: 10px 18px; border-radius: 100px; font-size: 0.7rem;
-  text-transform: uppercase; letter-spacing: 0.5px;
 }
 
-/* Overlays Plein Écran */
+/* Overlays */
 .overlay { position:fixed; inset:0; background:rgba(15,12,26,0.98); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:100; gap:20px; }
 .hidden { display:none; }
 .fs-layer { position:fixed; inset:0; background:#000; z-index:1000; display:none; align-items:center; justify-content:center; }
@@ -93,7 +72,7 @@ html, body {
 <body>
 
 <div class="app">
-  <div style="font-size:1.5rem; color:var(--accent); margin-bottom:10px; font-weight:bold; letter-spacing: 2px;">LE PENDU</div>
+  <div style="font-size:1.5rem; color:var(--accent); margin-bottom:10px; font-weight:bold;">LE PENDU</div>
   
   <div class="gallows-wrap">
     <svg id="gallows-svg" viewBox="0 0 220 160">
@@ -122,20 +101,21 @@ html, body {
 
 <div class="overlay hidden" id="overlay">
   <div id="overlay-emoji" style="font-size:4rem"></div>
-  <div id="overlay-title" style="font-size:2.5rem; font-weight:bold;"></div>
-  <button id="play-again-btn" style="padding:15px 40px; background:var(--accent); border:none; border-radius:5px; font-weight:bold; color:#000;">REJOUER</button>
+  <div id="overlay-title" style="font-size:2rem; font-weight:bold;"></div>
+  <button id="play-again-btn" style="padding:15px 40px; background:var(--accent); border:none; border-radius:5px; color:#000;">REJOUER</button>
   <button class="reward-btn" id="btn-img" style="display:none; padding:15px 40px; background:var(--accent3); border:none; border-radius:5px; color:#000;">VOIR IMAGE</button>
   <button class="reward-btn" id="btn-vid" style="display:none; padding:15px 40px; background:var(--accent2); border:none; border-radius:5px; color:#fff;">VOIR VIDÉO</button>
 </div>
 
 <div id="fs-img" class="fs-layer" onclick="this.style.display='none'; newGame();"><img id="target-img"></div>
-<div id="fs-vid" class="fs-layer" onclick="stopVid()"><video id="target-vid" controls playsinline></video></div>
+<div id="fs-vid" class="fs-layer" onclick="stopVid()">
+    <video id="target-vid" controls playsinline></video>
+</div>
 
 <script>
-// Logique identique (médias, mots, audio)
-const IMAGE_LIST = ["img/1.jpg", "img/2.jpg", "img/3.jpg", "img/4.jpg", "img/5.jpg"];
-const VIDEO_LIST = ["vid/1.mp4", "vid/2.mp4", "vid/3.mp4", "vid/4.mp4"];
-const WORDS = [{word:"GUITARE"},{word:"ELEPHANT"},{word:"PIZZA"},{word:"FUSEE"},{word:"VOLCAN"}];
+const IMAGE_LIST = ["img/1.jpg", "img/2.jpg", "img/3.jpg"];
+const VIDEO_LIST = ["vid/1.mp4", "vid/2.mp4", "vid/3.mp4"];
+const WORDS = [{word:"GUITARE"},{word:"ELEPHANT"},{word:"PIZZA"},{word:"FUSEE"}];
 const ROWS = [['A','Z','E','R','T','Y','U','I','O','P'],['Q','S','D','F','G','H','J','K','L','M'],['W','X','C','V','B','N']];
 const PARTS = ['p-head','p-body','p-larm','p-rarm','p-lleg','p-rleg'];
 
@@ -193,8 +173,23 @@ function render() {
 }
 
 document.getElementById('btn-img').onclick = () => document.getElementById('fs-img').style.display='flex';
-document.getElementById('btn-vid').onclick = () => { document.getElementById('fs-vid').style.display='flex'; const v=document.getElementById('target-vid'); v.load(); v.play(); };
-function stopVid() { const v=document.getElementById('target-vid'); v.pause(); document.getElementById('fs-vid').style.display='none'; newGame(); }
+document.getElementById('btn-vid').onclick = () => { 
+    document.getElementById('fs-vid').style.display='flex'; 
+    const v = document.getElementById('target-vid');
+    v.load(); v.play(); 
+};
+
+// FONCTION CORRECTE POUR COUPER LE SON SUR ANDROID
+function stopVid() { 
+    const v = document.getElementById('target-vid');
+    v.pause();
+    v.currentTime = 0;
+    v.src = ""; // Vide la source pour couper le son définitivement
+    v.load();
+    document.getElementById('fs-vid').style.display='none'; 
+    newGame(); 
+}
+
 document.getElementById('play-again-btn').onclick = newGame;
 
 const tracks = ['01.mp3', '02.mp3', '03.mp3'];
