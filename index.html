@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0f0c1a">
 <title>Le Pendu</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -139,30 +139,38 @@ body::before {
 .overlay-title.lose { color:var(--accent2); text-shadow:0 0 40px rgba(255,71,87,0.5); }
 .overlay-word { font-family:'DM Serif Display',serif; font-style:italic; font-size:1.4rem; color:var(--muted); }
 .overlay-word span { color:var(--text); font-style:normal; }
-
-.btn-group { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 200px; }
-
 .play-again-btn {
   background:var(--accent); color:var(--bg); border:none;
-  padding:14px; font-family:'Bebas Neue',sans-serif;
+  padding:14px 40px; font-family:'Bebas Neue',sans-serif;
   font-size:1.4rem; letter-spacing:0.15em; cursor:pointer;
   border-radius:4px; transition:all 0.2s;
   box-shadow:0 0 30px rgba(232,255,71,0.3);
 }
+.play-again-btn:hover { transform:translateY(-2px); box-shadow:0 0 50px rgba(232,255,71,0.5); }
 
-.reward-btn {
-  font-family:'Bebas Neue',sans-serif; font-size:1.2rem; letter-spacing:0.1em;
-  padding:12px; border:none; border-radius:4px; cursor:pointer;
+/* Bouton image / vidéo dans l'overlay */
+.bonus-btn {
+  background: transparent;
+  border: 2px solid var(--accent3);
+  color: var(--accent3);
+  padding: 10px 30px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.2rem; letter-spacing: 0.15em;
+  cursor: pointer; border-radius: 4px; transition: all 0.2s;
 }
-#btn-img { background: var(--accent3); color: var(--bg); display: none; }
-#btn-vid { background: var(--accent2); color: #fff; display: none; }
+.bonus-btn:hover { background: rgba(72,219,251,0.1); }
+.bonus-btn.hidden { display:none; }
 
-.fs-layer { position:fixed; inset:0; background:#000; z-index:1000; display:none; align-items:center; justify-content:center; }
-.fs-layer video, .fs-layer img { width:100%; height:100%; object-fit:contain; }
-.close-fs { 
-  position: absolute; top: 25px; right: 25px; z-index: 1100; 
-  background: var(--accent2); color: white; border: none; 
-  width: 45px; height: 45px; border-radius: 50%; font-size: 24px; font-weight: bold; 
+/* Visionneuse plein écran image / vidéo */
+.viewer {
+  position:fixed; inset:0; background:#000;
+  display:flex; align-items:center; justify-content:center;
+  z-index:100;
+}
+.viewer.hidden { display:none; }
+.viewer img, .viewer video {
+  max-width:100%; max-height:100%;
+  object-fit:contain; cursor:pointer;
 }
 
 .audio-btn {
@@ -173,6 +181,7 @@ body::before {
   padding:7px 12px; border-radius:100px;
   cursor:pointer; transition:all 0.2s;
 }
+.audio-btn:active { transform:scale(0.95); }
 </style>
 </head>
 <body>
@@ -216,34 +225,28 @@ body::before {
   <div class="overlay-emoji" id="overlay-emoji"></div>
   <div class="overlay-title" id="overlay-title"></div>
   <div class="overlay-word"  id="overlay-word"></div>
-  <div class="btn-group">
-    <button class="play-again-btn" id="play-again-btn">REJOUER</button>
-    <button class="reward-btn" id="btn-img">VOIR IMAGE</button>
-    <button class="reward-btn" id="btn-vid">VOIR VIDÉO</button>
-  </div>
+  <button class="bonus-btn hidden" id="img-btn">🖼 VOIR L'IMAGE</button>
+  <button class="bonus-btn hidden" id="vid-btn">🎬 VOIR LA VIDÉO</button>
+  <button class="play-again-btn" id="play-again-btn">REJOUER</button>
 </div>
 
-<div id="fs-img" class="fs-layer" onclick="stopImg()">
-    <button class="close-fs">✕</button>
-    <img id="target-img">
+<!-- Visionneuse image -->
+<div class="viewer hidden" id="img-viewer">
+  <img id="img-el" src="" alt="">
 </div>
-<div id="fs-vid" class="fs-layer">
-    <button class="close-fs" onclick="stopVid()">✕</button>
-    <video id="target-vid" controls playsinline></video>
+
+<!-- Visionneuse vidéo -->
+<div class="viewer hidden" id="vid-viewer">
+  <video id="vid-el" src="" playsinline></video>
 </div>
 
 <button class="audio-btn" id="music-btn" style="bottom:52px">🎵 Musique</button>
 <button class="audio-btn" id="next-btn"  style="bottom:14px">⏭ Next</button>
 
-<audio id="main-audio" preload="auto"></audio>
-
 <script>
-const IMAGE_LIST = ["img/1.jpg", "img/2.jpg", "img/3.jpg", "img/4.jpg", "img/5.jpg", "img/6.jpg", "img/7.jpg", "img/8.jpg", "img/9.jpg", "img/10.jpg", "img/11.jpg"];
-const VIDEO_LIST = ["vid/1.mp4", "vid/2.mp4", "vid/3.mp4", "vid/4.mp4", "vid/5.mp4", "vid/6.mp4", "vid/7.mp4"];
-
 const WORDS = [
   { word:"ELEPHANT",   cat:"Animaux",      hint:"Le plus grand mammifère terrestre" },
-  { word:"VOLCAN",      cat:"Nature",        hint:"Crache de la lave" },
+  { word:"VOLCAN",     cat:"Nature",        hint:"Crache de la lave" },
   { word:"GUITARE",    cat:"Musique",       hint:"Instrument à cordes pincées" },
   { word:"PYRAMIDE",   cat:"Histoire",      hint:"Tombeau des pharaons" },
   { word:"CHOCOLAT",   cat:"Nourriture",    hint:"Fait du cacao" },
@@ -252,21 +255,21 @@ const WORDS = [
   { word:"CROCODILE",  cat:"Animaux",       hint:"Reptile des marais" },
   { word:"PARACHUTE",  cat:"Sport",         hint:"Ralentit la chute" },
   { word:"DIAMANT",    cat:"Minéraux",      hint:"La pierre la plus dure" },
-  { word:"AURORE",      cat:"Nature",        hint:"Lumières polaires colorées" },
+  { word:"AURORE",     cat:"Nature",        hint:"Lumières polaires colorées" },
   { word:"VAMPIRE",    cat:"Fantastique",   hint:"Craint l'ail et le soleil" },
   { word:"CERISIER",   cat:"Arbres",        hint:"Fleurit en rose au Japon" },
   { word:"TORNADE",    cat:"Météo",         hint:"Colonne d'air en rotation" },
   { word:"SORCIERE",   cat:"Fantastique",   hint:"Chevauche un balai" },
   { word:"MANCHOT",    cat:"Animaux",       hint:"Pingouin qui ne vole pas" },
   { word:"TAMBOUR",    cat:"Musique",       hint:"Instrument à percussion" },
-  { word:"REQUIN",      cat:"Animaux",       hint:"Prédateur des océans" },
+  { word:"REQUIN",     cat:"Animaux",       hint:"Prédateur des océans" },
   { word:"CHATEAU",    cat:"Architecture",  hint:"Résidence médiévale fortifiée" },
-  { word:"DRAGON",      cat:"Fantastique",   hint:"Crache du feu et vole" },
-  { word:"GIRAFE",      cat:"Animaux",       hint:"A le cou le plus long" },
+  { word:"DRAGON",     cat:"Fantastique",   hint:"Crache du feu et vole" },
+  { word:"GIRAFE",     cat:"Animaux",       hint:"A le cou le plus long" },
   { word:"LICORNE",    cat:"Fantastique",   hint:"Cheval avec une corne magique" },
   { word:"PIZZA",      cat:"Nourriture",    hint:"Spécialité italienne ronde" },
   { word:"DAUPHIN",    cat:"Animaux",       hint:"Mammifère marin très intelligent" },
-  { word:"CACTUS",      cat:"Nature",        hint:"Plante du désert avec des épines" },
+  { word:"CACTUS",     cat:"Nature",        hint:"Plante du désert avec des épines" },
   { word:"ASTRONAUTE", cat:"Espace",        hint:"Pilote une navette spatiale" },
   { word:"BOULANGER",  cat:"Métiers",       hint:"Fabrique le pain chaque matin" },
   { word:"CASCADE",    cat:"Nature",        hint:"Chute d'eau naturelle" },
@@ -279,7 +282,7 @@ const WORDS = [
   { word:"JONGLEUR",   cat:"Spectacle",     hint:"Lance des balles en l'air" },
   { word:"KOALA",      cat:"Animaux",       hint:"Mange des feuilles d'eucalyptus" },
   { word:"LAGON",      cat:"Nature",        hint:"Mer calme entourée de coraux" },
-  { word:"MEDUSE",      cat:"Animaux",       hint:"Créature transparente des océans" },
+  { word:"MEDUSE",     cat:"Animaux",       hint:"Créature transparente des océans" },
   { word:"NAUFRAGE",   cat:"Aventure",      hint:"Bateau coulé au fond de la mer" },
   { word:"OURAGAN",    cat:"Météo",         hint:"Tempête tropicale très violente" },
   { word:"PINGOUIN",   cat:"Animaux",       hint:"Oiseau noir et blanc qui ne vole pas" },
@@ -289,24 +292,34 @@ const ROWS  = [['A','Z','E','R','T','Y','U','I','O','P'],['Q','S','D','F','G','H
 const PARTS = ['p-head','p-body','p-larm','p-rarm','p-lleg','p-rleg'];
 const MAX   = 6;
 
+// ── File mélangée générique ──────────────────────────────────
 function shuffle(a) {
   const b = [...a];
   for (let i = b.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]]; }
   return b;
 }
+function makeQueue(arr) {
+  let q = [];
+  return function() { if (!q.length) q = shuffle(arr); return q.shift(); };
+}
 
-let queue = [];
-function pick() { if (!queue.length) queue = shuffle(WORDS); return queue.shift(); }
+// Files de mots, images, vidéos
+const pickWord = makeQueue(WORDS);
+const pickImg  = makeQueue([1,2,3,4,5,6]);
+const pickVid  = makeQueue([1,2,3,4,5,6,7]);
 
-let W, H, C, G, E, S = 0, O, winStreak = 0;
+// ── État ────────────────────────────────────────────────────
+let W, H, C, G, E, S = 0, O;
+let winsCount = 0; // compteur victoires consécutives pour déclencher image
 
+// ── Jeu ─────────────────────────────────────────────────────
 function newGame() {
-  const e = pick();
+  const e = pickWord();
   W = e.word.toUpperCase(); H = e.hint; C = e.cat;
   G = new Set(); E = 0; O = false;
   document.getElementById('overlay').classList.add('hidden');
-  document.getElementById('btn-img').style.display = 'none';
-  document.getElementById('btn-vid').style.display = 'none';
+  document.getElementById('img-btn').classList.add('hidden');
+  document.getElementById('vid-btn').classList.add('hidden');
   render();
 }
 
@@ -314,8 +327,15 @@ function guess(l) {
   if (O || G.has(l)) return;
   G.add(l);
   if (!W.includes(l)) E++;
-  if ([...W].every(x => G.has(x))) { S += Math.max(10, 50-E*8); winStreak++; O = true; setTimeout(()=>end(true), 400); }
-  else if (E >= MAX)               { winStreak = 0; O = true; setTimeout(()=>end(false), 400); }
+  if ([...W].every(x => G.has(x))) {
+    S += Math.max(10, 50-E*8);
+    O = true;
+    winsCount++;
+    setTimeout(()=>end(true), 400);
+  } else if (E >= MAX) {
+    O = true;
+    setTimeout(()=>end(false), 400);
+  }
   render();
 }
 
@@ -327,20 +347,27 @@ function end(won) {
   document.getElementById('overlay-word').innerHTML = won
     ? 'Score\u00A0: <span>+' + Math.max(10,50-E*8) + ' pts</span>'
     : 'Le mot\u00A0était\u00A0: <span>' + W + '</span>';
-  
-  if (won && winStreak > 0 && winStreak % 2 === 0) {
-      document.getElementById('btn-img').style.display = 'block';
-  } else if (!won) {
-      document.getElementById('btn-vid').style.display = 'block';
+
+  // Bouton image toutes les 2 victoires
+  if (won && winsCount % 2 === 0) {
+    document.getElementById('img-btn').classList.remove('hidden');
   }
+  // Bouton vidéo à chaque défaite
+  if (!won) {
+    document.getElementById('vid-btn').classList.remove('hidden');
+  }
+
   document.getElementById('overlay').classList.remove('hidden');
 }
 
+// ── Render ───────────────────────────────────────────────────
 function render() {
   document.getElementById('category-label').textContent = C;
   document.getElementById('score').textContent = S;
   document.getElementById('hint-row').textContent = E >= 2 ? '💡 ' + H : '';
+
   PARTS.forEach((id,i) => document.getElementById(id).style.opacity = E > i ? '1' : '0');
+
   const bar = document.getElementById('attempts-bar');
   bar.innerHTML = '';
   for (let i = 0; i < MAX; i++) {
@@ -348,6 +375,7 @@ function render() {
     d.className = 'attempt-dot' + (i < E ? ' used' : '');
     bar.appendChild(d);
   }
+
   const wd = document.getElementById('word-display');
   wd.innerHTML = '';
   wd.className = 'word-display' + (W.length >= 9 ? ' long' : W.length >= 7 ? ' medium' : '');
@@ -361,6 +389,7 @@ function render() {
     ln.className = 'letter-line' + (G.has(l) ? ' revealed' : '');
     s.appendChild(ch); s.appendChild(ln); wd.appendChild(s);
   }
+
   const kb = document.getElementById('keyboard');
   kb.innerHTML = '';
   for (const row of ROWS) {
@@ -376,83 +405,89 @@ function render() {
   }
 }
 
-// --- FIX IMAGE ---
-document.getElementById('btn-img').onclick = function() {
-    const path = IMAGE_LIST[Math.floor(Math.random()*IMAGE_LIST.length)];
-    const imgElement = document.getElementById('target-img');
-    imgElement.src = path;
-    document.getElementById('fs-img').style.display = 'flex';
-};
-
-function stopImg() {
-    document.getElementById('fs-img').style.display = 'none';
-    newGame();
-}
-
-// --- FIX VIDEO ---
-document.getElementById('btn-vid').onclick = function() { 
-    const path = VIDEO_LIST[Math.floor(Math.random()*VIDEO_LIST.length)];
-    const v = document.getElementById('target-vid');
-    v.src = path;
-    v.load(); 
-    document.getElementById('fs-vid').style.display='flex'; 
-    v.oncanplay = () => v.play().catch(e => console.log("Play bloqué")); 
-};
-
-function stopVid() { 
-    const v = document.getElementById('target-vid');
-    v.pause();
-    v.removeAttribute('src'); 
-    v.load();
-    document.getElementById('fs-vid').style.display = 'none'; 
-    newGame(); 
-}
-
-// --- AUDIO (AVEC TES FICHIERS) ---
-(function() {
-  const tracks = ['01.mp3','02.mp3','03.mp3'];
-  let idx = 0;
-  let isActive = false;
-  const a = document.getElementById('main-audio');
-  const mb = document.getElementById('music-btn');
-  const nb = document.getElementById('next-btn');
-
-  function playTrack() {
-    a.src = tracks[idx];
-    a.load();
-    a.play().then(() => {
-        isActive = true;
-        mb.textContent = '🔇 Stop';
-    }).catch(e => {
-        isActive = false;
-        mb.textContent = '🎵 Musique';
-    });
-  }
-
-  mb.onclick = () => {
-    if (a.paused) playTrack();
-    else {
-      a.pause();
-      isActive = false;
-      mb.textContent = '🎵 Musique';
-    }
-  };
-
-  nb.onclick = () => {
-    idx = (idx + 1) % tracks.length;
-    playTrack();
-  };
-
-  a.onended = () => {
-    idx = (idx + 1) % tracks.length;
-    playTrack();
-  };
-})();
-
+// ── Boutons overlay ──────────────────────────────────────────
 document.getElementById('play-again-btn').addEventListener('click', newGame);
 document.addEventListener('keydown', e => { const l=e.key.toUpperCase(); if(/^[A-Z]$/.test(l)) guess(l); });
 
+// Bouton image
+document.getElementById('img-btn').addEventListener('click', function() {
+  const n = pickImg();
+  const imgEl = document.getElementById('img-el');
+  imgEl.src = 'img/' + n + '.jpg';
+  document.getElementById('img-viewer').classList.remove('hidden');
+});
+
+// Clic sur image → ferme et reprend
+document.getElementById('img-el').addEventListener('click', function() {
+  document.getElementById('img-viewer').classList.add('hidden');
+  newGame();
+});
+
+// Bouton vidéo
+document.getElementById('vid-btn').addEventListener('click', function() {
+  const n = pickVid();
+  const vidEl = document.getElementById('vid-el');
+  vidEl.src = 'vid/' + n + '.mp4';
+  vidEl.load();
+  vidEl.play().catch(()=>{});
+  document.getElementById('vid-viewer').classList.remove('hidden');
+});
+
+// Clic sur vidéo → stop + ferme + reprend
+document.getElementById('vid-el').addEventListener('click', function() {
+  const vidEl = document.getElementById('vid-el');
+  vidEl.pause();
+  vidEl.src = '';      // stoppe complètement, pas de lecture en arrière-plan
+  vidEl.load();
+  document.getElementById('vid-viewer').classList.add('hidden');
+  newGame();
+});
+
+// ── Démarrage ────────────────────────────────────────────────
 newGame();
+
+// ── Audio ────────────────────────────────────────────────────
+(function() {
+  try {
+    const tracks = ['01.mp3','02.mp3','03.mp3'];
+    let idx = 0, on = false;
+    const a = new Audio();
+    a.preload = 'none';
+
+    a.addEventListener('ended', function() {
+      idx = (idx+1) % tracks.length;
+      a.src = tracks[idx];
+      a.load();
+      a.addEventListener('canplaythrough', function h() {
+        a.removeEventListener('canplaythrough', h);
+        if (on) a.play().catch(()=>{});
+      });
+    });
+
+    const mb = document.getElementById('music-btn');
+    const nb = document.getElementById('next-btn');
+
+    mb.addEventListener('click', function() {
+      if (a.paused) {
+        a.src = tracks[idx];
+        a.load();
+        a.play().then(function() { on=true; mb.textContent='🔇 Stop'; }).catch(()=>{});
+      } else {
+        a.pause(); on=false; mb.textContent='🎵 Musique';
+      }
+    });
+
+    nb.addEventListener('click', function() {
+      idx = (idx+1) % tracks.length;
+      a.src = tracks[idx]; a.load();
+      if (on) a.play().catch(()=>{});
+    });
+
+  } catch(err) {
+    document.getElementById('music-btn').style.display='none';
+    document.getElementById('next-btn').style.display='none';
+  }
+})();
 </script>
 </body>
 </html>
