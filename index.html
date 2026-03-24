@@ -223,7 +223,10 @@ body::before {
   </div>
 </div>
 
-<div id="fs-img" class="fs-layer" onclick="stopImg()"><img id="target-img"></div>
+<div id="fs-img" class="fs-layer" onclick="stopImg()">
+    <button class="close-fs">✕</button>
+    <img id="target-img">
+</div>
 <div id="fs-vid" class="fs-layer">
     <button class="close-fs" onclick="stopVid()">✕</button>
     <video id="target-vid" controls playsinline></video>
@@ -231,6 +234,8 @@ body::before {
 
 <button class="audio-btn" id="music-btn" style="bottom:52px">🎵 Musique</button>
 <button class="audio-btn" id="next-btn"  style="bottom:14px">⏭ Next</button>
+
+<audio id="main-audio" preload="auto"></audio>
 
 <script>
 const IMAGE_LIST = ["img/1.jpg", "img/2.jpg", "img/3.jpg", "img/4.jpg", "img/5.jpg", "img/6.jpg", "img/7.jpg", "img/8.jpg", "img/9.jpg", "img/10.jpg", "img/11.jpg"];
@@ -371,7 +376,29 @@ function render() {
   }
 }
 
+// --- FIX IMAGE ---
+document.getElementById('btn-img').onclick = function() {
+    const path = IMAGE_LIST[Math.floor(Math.random()*IMAGE_LIST.length)];
+    const imgElement = document.getElementById('target-img');
+    imgElement.src = path;
+    document.getElementById('fs-img').style.display = 'flex';
+};
+
+function stopImg() {
+    document.getElementById('fs-img').style.display = 'none';
+    newGame();
+}
+
 // --- FIX VIDEO ---
+document.getElementById('btn-vid').onclick = function() { 
+    const path = VIDEO_LIST[Math.floor(Math.random()*VIDEO_LIST.length)];
+    const v = document.getElementById('target-vid');
+    v.src = path;
+    v.load(); 
+    document.getElementById('fs-vid').style.display='flex'; 
+    v.oncanplay = () => v.play().catch(e => console.log("Play bloqué")); 
+};
+
 function stopVid() { 
     const v = document.getElementById('target-vid');
     v.pause();
@@ -381,53 +408,30 @@ function stopVid() {
     newGame(); 
 }
 
-function stopImg() {
-    document.getElementById('fs-img').style.display = 'none';
-    newGame();
-}
-
-document.getElementById('btn-img').onclick = () => {
-    const path = IMAGE_LIST[Math.floor(Math.random()*IMAGE_LIST.length)];
-    document.getElementById('target-img').src = path;
-    document.getElementById('fs-img').style.display='flex';
-};
-
-document.getElementById('btn-vid').onclick = () => { 
-    const path = VIDEO_LIST[Math.floor(Math.random()*VIDEO_LIST.length)];
-    const v = document.getElementById('target-vid');
-    v.src = path;
-    v.load(); // Force le rafraîchissement du lecteur
-    document.getElementById('fs-vid').style.display='flex'; 
-    // On attend que la vidéo soit prête pour éviter l'écran noir
-    v.oncanplay = () => {
-        v.play().catch(e => console.log("Play auto bloqué, l'utilisateur doit cliquer sur play"));
-    };
-};
-
-document.getElementById('play-again-btn').addEventListener('click', newGame);
-document.addEventListener('keydown', e => { const l=e.key.toUpperCase(); if(/^[A-Z]$/.test(l)) guess(l); });
-
-newGame();
-
 // --- AUDIO (AVEC TES FICHIERS) ---
 (function() {
-  // Remplace ici par tes nouveaux noms de fichiers si nécessaire
-  const tracks = ['01.mp3','02.mp3','03.mp3'];
+  const tracks = ['Foyer.mp3', 'K2000.mp3']; 
   let idx = 0;
   let isActive = false;
-  const a = new Audio();
-
+  const a = document.getElementById('main-audio');
   const mb = document.getElementById('music-btn');
   const nb = document.getElementById('next-btn');
 
-  mb.onclick = () => {
-    if (a.paused) {
-      if (!a.src || a.src === "") a.src = tracks[idx];
-      a.play().then(() => {
+  function playTrack() {
+    a.src = tracks[idx];
+    a.load();
+    a.play().then(() => {
         isActive = true;
         mb.textContent = '🔇 Stop';
-      });
-    } else {
+    }).catch(e => {
+        isActive = false;
+        mb.textContent = '🎵 Musique';
+    });
+  }
+
+  mb.onclick = () => {
+    if (a.paused) playTrack();
+    else {
       a.pause();
       isActive = false;
       mb.textContent = '🎵 Musique';
@@ -436,16 +440,19 @@ newGame();
 
   nb.onclick = () => {
     idx = (idx + 1) % tracks.length;
-    a.src = tracks[idx];
-    if (isActive) a.play();
+    playTrack();
   };
 
   a.onended = () => {
     idx = (idx + 1) % tracks.length;
-    a.src = tracks[idx];
-    a.play();
+    playTrack();
   };
 })();
+
+document.getElementById('play-again-btn').addEventListener('click', newGame);
+document.addEventListener('keydown', e => { const l=e.key.toUpperCase(); if(/^[A-Z]$/.test(l)) guess(l); });
+
+newGame();
 </script>
 </body>
 </html>
