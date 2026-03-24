@@ -438,21 +438,10 @@ document.getElementById('play-again-btn').addEventListener('click', newGame);
 document.addEventListener('keydown', e => { const l=e.key.toUpperCase(); if(/^[A-Z]$/.test(l)) guess(l); });
 
 // Bouton image
-// --- BLOC IMAGE RÉPARÉ POUR ANDROID ---
-document.getElementById('img-btn').onclick = function() {
-    const n = pickImg();
-    const imgEl = document.getElementById('img-el');
-    const viewer = document.getElementById('img-viewer');
-    
-    // 1. On prépare l'image AVANT de l'afficher
-    imgEl.src = 'img/' + n + '.jpg';
-    
-    // 2. On force l'affichage dès que l'image commence à charger
-    viewer.classList.remove('hidden');
-    viewer.style.display = 'flex'; // Force le moteur de rendu
-    
-    // 3. Petit "hack" Android : on s'assure que l'image n'est pas invisible
-    imgEl.style.opacity = "1";
+document.getElementById('btn-img').onclick = function() {
+    const img = document.getElementById('target-img');
+    img.src = IMAGE_LIST[Math.floor(Math.random() * IMAGE_LIST.length)];
+    document.getElementById('fs-img').style.display = 'flex';
 };
 
 // Fermeture simplifiée (clic sur le fond noir)
