@@ -3,6 +3,7 @@ const CACHE = 'pendu-v1.0.1';
 const FILES = [
   './',
   'index.html',
+  'manifest.json',
   '01.mp3',
   '02.mp3',
   '03.mp3',
@@ -21,7 +22,6 @@ const FILES = [
   'vid/7.mp4',
 ];
 
-// Installation : mise en cache de tous les fichiers
 self.addEventListener('install', function(e) {
   e.waitUntil(
     caches.open(CACHE).then(function(cache) {
@@ -31,7 +31,6 @@ self.addEventListener('install', function(e) {
   self.skipWaiting();
 });
 
-// Activation : supprime les anciens caches
 self.addEventListener('activate', function(e) {
   e.waitUntil(
     caches.keys().then(function(keys) {
@@ -44,7 +43,6 @@ self.addEventListener('activate', function(e) {
   self.clients.claim();
 });
 
-// Fetch : sert depuis le cache, sinon réseau
 self.addEventListener('fetch', function(e) {
   e.respondWith(
     caches.match(e.request).then(function(cached) {
