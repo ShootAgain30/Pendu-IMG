@@ -11,33 +11,32 @@
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 html, body { height: 100%; background: var(--bg); color: var(--text); font-family: sans-serif; overflow: hidden; }
 
-.app { height: 100dvh; display: flex; flex-direction: column; align-items: center; padding: 15px; max-width: 480px; margin: 0 auto; }
+.app { height: 100dvh; display: flex; flex-direction: column; align-items: center; padding: 10px; max-width: 480px; margin: 0 auto; }
 
 /* Potence Taille Normale */
-.gallows-wrap { width:100%; display:flex; justify-content:center; margin-bottom:15px; flex-shrink:0; }
+.gallows-wrap { width:100%; display:flex; justify-content:center; margin-bottom:10px; flex-shrink:0; }
 #gallows-svg { width:180px; height:130px; }
 
-.word-display { display:flex; gap:8px; justify-content:center; margin-bottom:15px; min-height:40px; }
+.word-display { display:flex; gap:8px; justify-content:center; margin-bottom:10px; min-height:40px; }
 .letter-slot { display:flex; flex-direction:column; align-items:center; }
 .letter-char { font-size:1.6rem; min-width:24px; text-align:center; height: 30px; }
 .letter-line { height:2px; background:rgba(255,255,255,0.2); width:24px; }
 .letter-line.revealed { background:var(--accent); }
 
-/* POSITIONNEMENT DU BAS */
-.bottom-ui { 
-  margin-top: auto; 
-  width: 100%; 
-  display: flex; 
-  flex-direction: column; 
-  align-items: center;
-  padding-bottom: 20px; /* Espace de sécurité tout en bas */
+/* ZONE BASSE : FORCE L'ORDRE CLAVIER PUIS BOUTONS */
+.bottom-container {
+  margin-top: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column; /* Aligne les éléments verticalement */
+  gap: 20px; /* Espace fixe entre le clavier et les boutons */
+  padding-bottom: 25px;
 }
 
 .keyboard { 
   display:flex; 
   flex-direction:column; 
   gap:6px; 
-  margin-bottom: 20px; /* CECI MONTE LE CLAVIER */
 }
 
 .key-row { display:flex; justify-content:center; gap:4px; }
@@ -49,11 +48,14 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 .key.correct { color:var(--accent); border-color:var(--accent); }
 .key.wrong { opacity: 0.2; }
 
-/* Boutons placés sous le clavier remonté */
-.audio-row { display: flex; gap: 10px; }
+.audio-row { 
+  display: flex; 
+  justify-content: center; 
+  gap: 15px; 
+}
 .audio-btn { 
   background: rgba(232,255,71,0.1); border: 1px solid var(--accent); 
-  color: var(--accent); padding: 8px 15px; border-radius: 20px; font-size: 0.7rem; 
+  color: var(--accent); padding: 10px 20px; border-radius: 20px; font-size: 0.75rem; 
 }
 
 /* Overlays */
@@ -66,7 +68,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 <body>
 
 <div class="app">
-  <div style="font-size:1.8rem; color:var(--accent); margin-bottom:15px; font-weight:bold;">LE PENDU</div>
+  <div style="font-size:1.6rem; color:var(--accent); margin-bottom:10px; font-weight:bold;">LE PENDU</div>
   
   <div class="gallows-wrap">
     <svg id="gallows-svg" viewBox="0 0 220 160">
@@ -84,7 +86,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 
   <div class="word-display" id="word-display"></div>
 
-  <div class="bottom-ui">
+  <div class="bottom-container">
     <div class="keyboard" id="keyboard"></div>
     <div class="audio-row">
       <button class="audio-btn" id="music-btn">🎵 Musique</button>
@@ -95,8 +97,8 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 
 <div class="overlay hidden" id="overlay">
   <div id="overlay-emoji" style="font-size:4rem"></div>
-  <div id="overlay-title" style="font-size:2.5rem; font-weight:bold;"></div>
-  <button id="play-again-btn" style="padding:15px 40px; background:var(--accent); border:none; border-radius:5px; font-weight:bold;">REJOUER</button>
+  <div id="overlay-title" style="font-size:2rem; font-weight:bold;"></div>
+  <button id="play-again-btn" style="padding:15px 40px; background:var(--accent); border:none; border-radius:5px;">REJOUER</button>
   <button class="reward-btn" id="btn-img" style="display:none; padding:15px 40px; background:var(--accent3); border:none; border-radius:5px;">VOIR IMAGE</button>
   <button class="reward-btn" id="btn-vid" style="display:none; padding:15px 40px; background:var(--accent2); border:none; border-radius:5px;">VOIR VIDÉO</button>
 </div>
@@ -105,9 +107,10 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 <div id="fs-vid" class="fs-layer" onclick="stopVid()"><video id="target-vid" controls playsinline></video></div>
 
 <script>
-const IMAGE_LIST = ["img/1.jpg", "img/2.jpg", "img/3.jpg"];
-const VIDEO_LIST = ["vid/1.mp4", "vid/2.mp4", "vid/3.mp4"];
-const WORDS = [{word:"GUITARE"},{word:"ELEPHANT"},{word:"PIZZA"}];
+// Listes de médias et logique de jeu
+const IMAGE_LIST = ["img/1.jpg", "img/2.jpg", "img/3.jpg", "img/4.jpg", "img/5.jpg", "img/6.jpg", "img/7.jpg", "img/8.jpg", "img/9.jpg", "img/10.jpg", "img/11.jpg"];
+const VIDEO_LIST = ["vid/1.mp4", "vid/2.mp4", "vid/3.mp4", "vid/4.mp4", "vid/5.mp4", "vid/6.mp4", "vid/7.mp4"];
+const WORDS = [{word:"GUITARE"},{word:"ELEPHANT"},{word:"PIZZA"},{word:"CHOCOLAT"},{word:"FUSEE"}];
 const ROWS = [['A','Z','E','R','T','Y','U','I','O','P'],['Q','S','D','F','G','H','J','K','L','M'],['W','X','C','V','B','N']];
 const PARTS = ['p-head','p-body','p-larm','p-rarm','p-lleg','p-rleg'];
 
@@ -133,7 +136,7 @@ function guess(l) {
 function end(won) {
   document.getElementById('overlay-emoji').textContent = won ? '🎉' : '💀';
   document.getElementById('overlay-title').textContent = won ? 'BRAVO' : 'PERDU';
-  if (won && winStreak % 2 === 0) {
+  if (won && winStreak > 0 && winStreak % 2 === 0) {
     document.getElementById('btn-img').style.display = 'block';
     document.getElementById('target-img').src = IMAGE_LIST[Math.floor(Math.random()*IMAGE_LIST.length)];
   } else if (!won) {
