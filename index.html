@@ -438,29 +438,38 @@ function render() {
 document.getElementById('play-again-btn').addEventListener('click', newGame);
 document.addEventListener('keydown', e => { const l=e.key.toUpperCase(); if(/^[A-Z]$/.test(l)) guess(l); });
 
-// Bouton image (CORRIGÉ)
+// ── Bouton image  ───────────────────────────────
 document.getElementById('img-btn').addEventListener('click', function() {
-  const n = pickImg();
+  const n = pickImg(); // numéro de l'image
   const imgEl = document.getElementById('img-el');
   const viewer = document.getElementById('img-viewer');
 
-  // afficher immédiatement
+  // affiche immédiatement la visionneuse
   viewer.classList.remove('hidden');
 
-  // reset (important)
+  // reset src pour forcer le reload même si la même image est utilisée
   imgEl.src = '';
 
-  // charger image
+  // charge l'image
   imgEl.src = 'img/' + n + '.jpg';
+
+  // debug : affiche dans la console si ça charge
+  imgEl.onload  = () => console.log('Image ' + n + ' OK');
+  imgEl.onerror = () => console.error('Erreur chargement image ' + n);
 });
 
-// Clic/touch sur image → ferme et reprend
+// ── Clic/touch sur l'image → ferme et reprend le jeu ──
 function closeImg() {
-  document.getElementById('img-viewer').classList.add('hidden');
+  const viewer = document.getElementById('img-viewer');
+  viewer.classList.add('hidden');
   newGame();
 }
-document.getElementById('img-el').addEventListener('click',    closeImg);
-document.getElementById('img-el').addEventListener('touchend', function(e){ e.preventDefault(); closeImg(); });
+
+document.getElementById('img-el').addEventListener('click', closeImg);
+document.getElementById('img-el').addEventListener('touchend', function(e){ 
+  e.preventDefault(); 
+  closeImg(); 
+});
 
 // Bouton vidéo
 document.getElementById('vid-btn').addEventListener('click', function() {
