@@ -1,4 +1,4 @@
-const CACHE = 'pendu-v1.0.5';
+const CACHE = 'pendu-v1.0.6';
 
 const FILES = [
   './',
@@ -48,7 +48,7 @@ self.addEventListener('activate', function(e) {
 
 self.addEventListener('fetch', function(e) {
   e.respondWith(
-    caches.match(e.request).then(function(cached) {
+    caches.match(e.request, { ignoreSearch: true }).then(function(cached) {
       return cached || fetch(e.request);
     })
   );
