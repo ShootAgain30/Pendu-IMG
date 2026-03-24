@@ -125,12 +125,11 @@ body::before {
 .key.correct { background:rgba(232,255,71,0.12); border-color:var(--accent); color:var(--accent); cursor:default; }
 .key.wrong   { background:rgba(255,71,87,0.08);  border-color:rgba(255,71,87,0.3); color:var(--accent2); cursor:default; opacity:0.5; }
 
-/* OVERLAYS ET RECOMPENSES */
 .overlay {
   position:fixed; inset:0; background:rgba(15,12,26,0.93);
   backdrop-filter:blur(12px);
   display:flex; flex-direction:column; align-items:center; justify-content:center;
-  z-index:50; gap:15px; padding:32px; text-align:center; transition:opacity 0.4s;
+  z-index:50; gap:20px; padding:32px; text-align:center; transition:opacity 0.4s;
 }
 .overlay.hidden { opacity:0; pointer-events:none; }
 .overlay-emoji { font-size:4rem; animation:bounceIn 0.6s cubic-bezier(0.34,1.56,0.64,1); }
@@ -158,7 +157,6 @@ body::before {
 #btn-img { background: var(--accent3); color: var(--bg); display: none; }
 #btn-vid { background: var(--accent2); color: #fff; display: none; }
 
-/* FULLSCREEN REWARDS */
 .fs-layer { position:fixed; inset:0; background:#000; z-index:1000; display:none; align-items:center; justify-content:center; }
 .fs-layer video, .fs-layer img { width:100%; height:100%; object-fit:contain; }
 .close-fs { 
@@ -235,7 +233,6 @@ body::before {
 <button class="audio-btn" id="next-btn"  style="bottom:14px">⏭ Next</button>
 
 <script>
-// TON CODE ORIGINAL INTACT
 const IMAGE_LIST = ["img/1.jpg", "img/2.jpg", "img/3.jpg", "img/4.jpg", "img/5.jpg", "img/6.jpg", "img/7.jpg", "img/8.jpg", "img/9.jpg", "img/10.jpg", "img/11.jpg"];
 const VIDEO_LIST = ["vid/1.mp4", "vid/2.mp4", "vid/3.mp4", "vid/4.mp4", "vid/5.mp4", "vid/6.mp4", "vid/7.mp4"];
 
@@ -326,13 +323,11 @@ function end(won) {
     ? 'Score\u00A0: <span>+' + Math.max(10,50-E*8) + ' pts</span>'
     : 'Le mot\u00A0était\u00A0: <span>' + W + '</span>';
   
-  // LOGIQUE RECOMPENSES
   if (won && winStreak > 0 && winStreak % 2 === 0) {
       document.getElementById('btn-img').style.display = 'block';
   } else if (!won) {
       document.getElementById('btn-vid').style.display = 'block';
   }
-  
   document.getElementById('overlay').classList.remove('hidden');
 }
 
@@ -376,28 +371,37 @@ function render() {
   }
 }
 
-// GESTION RECOMPENSES
+// --- FIX VIDEO ---
 function stopVid() { 
     const v = document.getElementById('target-vid');
-    v.pause(); v.src = ""; v.load();
+    v.pause();
+    v.removeAttribute('src'); 
+    v.load();
     document.getElementById('fs-vid').style.display = 'none'; 
     newGame(); 
 }
+
 function stopImg() {
     document.getElementById('fs-img').style.display = 'none';
     newGame();
 }
+
 document.getElementById('btn-img').onclick = () => {
     const path = IMAGE_LIST[Math.floor(Math.random()*IMAGE_LIST.length)];
     document.getElementById('target-img').src = path;
     document.getElementById('fs-img').style.display='flex';
 };
+
 document.getElementById('btn-vid').onclick = () => { 
     const path = VIDEO_LIST[Math.floor(Math.random()*VIDEO_LIST.length)];
     const v = document.getElementById('target-vid');
     v.src = path;
+    v.load(); // Force le rafraîchissement du lecteur
     document.getElementById('fs-vid').style.display='flex'; 
-    v.load(); v.play(); 
+    // On attend que la vidéo soit prête pour éviter l'écran noir
+    v.oncanplay = () => {
+        v.play().catch(e => console.log("Play auto bloqué, l'utilisateur doit cliquer sur play"));
+    };
 };
 
 document.getElementById('play-again-btn').addEventListener('click', newGame);
@@ -405,38 +409,42 @@ document.addEventListener('keydown', e => { const l=e.key.toUpperCase(); if(/^[A
 
 newGame();
 
-// AUDIO ISOLE
+// --- AUDIO (AVEC TES FICHIERS) ---
 (function() {
-  try {
-    const tracks = ['01.mp3','02.mp3','03.mp3'];
-    let idx = 0, on = false;
-    const a = new Audio();
-    a.preload = 'none';
-    a.addEventListener('ended', function() {
-      idx = (idx+1) % tracks.length;
-      a.src = tracks[idx]; a.load();
-      a.addEventListener('canplaythrough', function h() {
-        a.removeEventListener('canplaythrough', h);
-        if (on) a.play().catch(()=>{});
+  // Remplace ici par tes nouveaux noms de fichiers si nécessaire
+  const tracks = ['01.mp3','02.mp3','03.mp3'];
+  let idx = 0;
+  let isActive = false;
+  const a = new Audio();
+
+  const mb = document.getElementById('music-btn');
+  const nb = document.getElementById('next-btn');
+
+  mb.onclick = () => {
+    if (a.paused) {
+      if (!a.src || a.src === "") a.src = tracks[idx];
+      a.play().then(() => {
+        isActive = true;
+        mb.textContent = '🔇 Stop';
       });
-    });
-    const mb = document.getElementById('music-btn');
-    const nb = document.getElementById('next-btn');
-    mb.addEventListener('click', function() {
-      if (a.paused) {
-        if (!a.src || a.src === location.href) a.src = tracks[idx];
-        a.play().then(function() { on=true; mb.textContent='🔇 Stop'; }).catch(()=>{});
-      } else { a.pause(); on=false; mb.textContent='🎵 Musique'; }
-    });
-    nb.addEventListener('click', function() {
-      idx = (idx+1) % tracks.length;
-      a.src = tracks[idx]; a.load();
-      if (on) a.play().catch(()=>{});
-    });
-  } catch(err) {
-    document.getElementById('music-btn').style.display='none';
-    document.getElementById('next-btn').style.display='none';
-  }
+    } else {
+      a.pause();
+      isActive = false;
+      mb.textContent = '🎵 Musique';
+    }
+  };
+
+  nb.onclick = () => {
+    idx = (idx + 1) % tracks.length;
+    a.src = tracks[idx];
+    if (isActive) a.play();
+  };
+
+  a.onended = () => {
+    idx = (idx + 1) % tracks.length;
+    a.src = tracks[idx];
+    a.play();
+  };
 })();
 </script>
 </body>
