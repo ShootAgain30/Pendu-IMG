@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Le Pendu Complet</title>
 <style>
 :root {
   --bg: #0f0c1a; --accent: #e8ff47; --accent2: #ff4757; --accent3: #48dbfb;
@@ -12,146 +13,177 @@
 html, body { height: 100dvh; background: var(--bg); color: var(--text); font-family: sans-serif; overflow: hidden; position: fixed; width: 100%; }
 
 .app { height: 100dvh; display: flex; flex-direction: column; align-items: center; padding: 10px 15px; max-width: 480px; margin: 0 auto; }
-.gallows-wrap { width:100%; display:flex; justify-content:center; margin-bottom:10px; flex-shrink: 1; min-height: 120px; }
-#gallows-svg { width:180px; height:130px; }
-.word-display { display:flex; gap:6px; justify-content:center; margin-bottom:15px; min-height:40px; }
+
+/* HEADER & THEME */
+.header { width: 100%; text-align: center; margin-bottom: 5px; }
+.category-box { display: inline-block; background: var(--card); border: 1px solid var(--border); padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; color: var(--accent3); text-transform: uppercase; letter-spacing: 1px; }
+
+/* POTENCE */
+.gallows-wrap { width:100%; display:flex; justify-content:center; margin-bottom:10px; flex-shrink: 1; min-height: 130px; }
+#gallows-svg { width:180px; height:140px; }
+
+/* INDICE ET MOT */
+.hint-row { height: 20px; margin-bottom: 10px; }
+#hint-display { font-style: italic; font-size: 0.9rem; color: var(--accent); text-align: center; }
+
+.word-display { display:flex; gap:8px; justify-content:center; margin-bottom:20px; min-height:45px; }
 .letter-slot { display:flex; flex-direction:column; align-items:center; }
-.letter-char { font-size:1.6rem; min-width:22px; text-align:center; height: 30px; font-weight: bold; }
-.letter-line { height:2px; background:rgba(255,255,255,0.2); width:22px; }
-.letter-line.revealed { background:var(--accent); }
+.letter-char { font-size:1.8rem; min-width:24px; text-align:center; height: 35px; font-weight: bold; color: var(--text); }
+.letter-line { height:3px; background:rgba(255,255,255,0.2); width:24px; border-radius: 2px; }
+.letter-line.revealed { background:var(--accent); box-shadow: 0 0 10px var(--accent); }
 
-.bottom-container { margin-top: auto; width: 100%; display: flex; flex-direction: column; gap: 20px; padding-bottom: 30px; }
-.keyboard { display:flex; flex-direction:column; gap:6px; }
-.key-row { display:flex; justify-content:center; gap:4px; }
-.key { background:var(--card); border:1px solid var(--border); color:var(--text); width:34px; height:44px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size: 0.9rem; }
-.key.correct { color:var(--accent); border-color:var(--accent); }
-.key.wrong { opacity: 0.15; }
+/* CONTENEUR BAS : CLAVIER PUIS AUDIO */
+.bottom-ui { margin-top: auto; width: 100%; display: flex; flex-direction: column; gap: 20px; padding-bottom: 35px; }
 
-.audio-row { display: flex; justify-content: center; gap: 12px; }
-.audio-btn { background: rgba(232,255,71,0.05); border: 1px solid var(--accent); color: var(--accent); padding: 10px 18px; border-radius: 100px; font-size: 0.7rem; }
+.keyboard { display:flex; flex-direction:column; gap:8px; }
+.key-row { display:flex; justify-content:center; gap:5px; }
+.key { 
+  background:var(--card); border:1px solid var(--border); color:var(--text); 
+  width:36px; height:46px; border-radius:8px; display:flex; 
+  align-items:center; justify-content:center; font-size: 1rem; font-weight: bold;
+}
+.key.correct { color:var(--accent); border-color:var(--accent); background: rgba(232,255,71,0.1); }
+.key.wrong { opacity: 0.2; background: rgba(255,255,255,0.02); }
 
-.overlay { position:fixed; inset:0; background:rgba(15,12,26,0.98); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:100; gap:20px; }
+.audio-row { display: flex; justify-content: center; gap: 15px; }
+.audio-btn { 
+  background: rgba(232,255,71,0.05); border: 1px solid var(--accent); 
+  color: var(--accent); padding: 12px 22px; border-radius: 100px; font-size: 0.75rem; font-weight: bold;
+}
+
+/* OVERLAYS */
+.overlay { position:fixed; inset:0; background:rgba(15,12,26,0.98); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:100; gap:25px; }
 .hidden { display:none; }
-
-/* Styles Vidéo Plein Écran */
 .fs-layer { position:fixed; inset:0; background:#000; z-index:1000; display:none; align-items:center; justify-content:center; }
 .fs-layer video, .fs-layer img { width:100%; height:100%; object-fit:contain; }
 
-/* Bouton Fermer pour la vidéo */
-.close-fs { 
-  position: absolute; top: 20px; right: 20px; z-index: 1100;
-  background: var(--accent2); color: white; border: none; 
-  width: 40px; height: 40px; border-radius: 50%; font-weight: bold; font-size: 20px;
-}
+.close-fs { position: absolute; top: 25px; right: 25px; z-index: 1100; background: var(--accent2); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; font-size: 24px; font-weight: bold; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
 </style>
 </head>
 <body>
 
 <div class="app">
-  <div style="font-size:1.5rem; color:var(--accent); margin-bottom:10px; font-weight:bold;">LE PENDU</div>
-  <div class="gallows-wrap">
-    <svg id="gallows-svg" viewBox="0 0 220 160">
-      <line x1="20" y1="155" x2="200" y2="155" stroke="white" stroke-opacity="0.2" stroke-width="3"/>
-      <line x1="60" y1="155" x2="60" y2="10" stroke="white" stroke-opacity="0.2" stroke-width="3"/>
-      <line x1="60" y1="10" x2="140" y2="10" stroke="white" stroke-opacity="0.2" stroke-width="3"/>
-      <circle id="p-head" cx="140" cy="44" r="14" stroke="#ff4757" stroke-width="2.5" opacity="0"/>
-      <line id="p-body" x1="140" y1="58" x2="140" y2="100" stroke="#ff4757" stroke-width="2.5" opacity="0"/>
-      <line id="p-larm" x1="140" y1="70" x2="118" y2="90" stroke="#ff4757" stroke-width="2.5" opacity="0"/>
-      <line id="p-rarm" x1="140" y1="70" x2="162" y2="90" stroke="#ff4757" stroke-width="2.5" opacity="0"/>
-      <line id="p-lleg" x1="140" y1="100" x2="118" y2="130" stroke="#ff4757" stroke-width="2.5" opacity="0"/>
-      <line id="p-rleg" x1="140" y1="100" x2="162" y2="130" stroke="#ff4757" stroke-width="2.5" opacity="0"/>
-    </svg>
-  </div>
-  <div class="word-display" id="word-display"></div>
-  <div class="bottom-container">
-    <div class="keyboard" id="keyboard"></div>
-    <div class="audio-row">
-      <button class="audio-btn" id="music-btn">🎵 Musique</button>
-      <button class="audio-btn" id="next-btn">⏭ Next</button>
+    <div class="header">
+        <div style="font-size:1.4rem; font-weight:bold; color:var(--text); opacity:0.5; margin-bottom:8px;">PENDU</div>
+        <div class="category-box" id="category-display">THEME</div>
     </div>
-  </div>
+
+    <div class="gallows-wrap">
+        <svg id="gallows-svg" viewBox="0 0 220 160">
+            <line x1="20" y1="155" x2="200" y2="155" stroke="white" stroke-opacity="0.2" stroke-width="3"/>
+            <line x1="60" y1="155" x2="60" y2="10" stroke="white" stroke-opacity="0.2" stroke-width="3"/>
+            <line x1="60" y1="10" x2="140" y2="10" stroke="white" stroke-opacity="0.2" stroke-width="3"/>
+            <circle id="p-head" cx="140" cy="44" r="14" stroke="#ff4757" stroke-width="2.5" opacity="0"/>
+            <line id="p-body" x1="140" y1="58" x2="140" y2="100" stroke="#ff4757" stroke-width="2.5" opacity="0"/>
+            <line id="p-larm" x1="140" y1="70" x2="118" y2="90" stroke="#ff4757" stroke-width="2.5" opacity="0"/>
+            <line id="p-rarm" x1="140" y1="70" x2="162" y2="90" stroke="#ff4757" stroke-width="2.5" opacity="0"/>
+            <line id="p-lleg" x1="140" y1="100" x2="118" y2="130" stroke="#ff4757" stroke-width="2.5" opacity="0"/>
+            <line id="p-rleg" x1="140" y1="100" x2="162" y2="130" stroke="#ff4757" stroke-width="2.5" opacity="0"/>
+        </svg>
+    </div>
+
+    <div class="hint-row"><div id="hint-display"></div></div>
+    <div class="word-display" id="word-display"></div>
+
+    <div class="bottom-ui">
+        <div class="keyboard" id="keyboard"></div>
+        <div class="audio-row">
+            <button class="audio-btn" id="music-btn">🎵 MUSIQUE</button>
+            <button class="audio-btn" id="next-btn">⏭ NEXT</button>
+        </div>
+    </div>
 </div>
 
 <div class="overlay hidden" id="overlay">
-  <div id="overlay-emoji" style="font-size:4rem"></div>
-  <div id="overlay-title" style="font-size:2rem; font-weight:bold;"></div>
-  <button id="play-again-btn" style="padding:15px 40px; background:var(--accent); border:none; border-radius:5px;">REJOUER</button>
-  <button class="reward-btn" id="btn-img" style="display:none; padding:15px 40px; background:var(--accent3); border:none; border-radius:5px;">VOIR IMAGE</button>
-  <button class="reward-btn" id="btn-vid" style="display:none; padding:15px 40px; background:var(--accent2); border:none; border-radius:5px;">VOIR VIDÉO</button>
+    <div id="overlay-emoji" style="font-size:5rem"></div>
+    <div id="overlay-title" style="font-size:2.5rem; font-weight:bold; letter-spacing:2px;"></div>
+    <div id="overlay-msg" style="font-size:1.1rem; opacity:0.7;"></div>
+    <button id="play-again-btn" style="padding:18px 50px; background:var(--accent); border:none; border-radius:8px; color:#000; font-weight:bold; font-size:1.2rem;">REJOUER</button>
+    <button class="reward-btn" id="btn-img" style="display:none; padding:18px 50px; background:var(--accent3); border:none; border-radius:8px; color:#000; font-weight:bold;">VOIR IMAGE</button>
+    <button class="reward-btn" id="btn-vid" style="display:none; padding:18px 50px; background:var(--accent2); border:none; border-radius:8px; color:#fff; font-weight:bold;">VOIR VIDÉO</button>
 </div>
 
 <div id="fs-img" class="fs-layer" onclick="this.style.display='none'; newGame();"><img id="target-img"></div>
-
 <div id="fs-vid" class="fs-layer">
     <button class="close-fs" onclick="stopVid()">✕</button>
     <video id="target-vid" controls playsinline></video>
 </div>
 
 <script>
-const IMAGE_LIST = ["img/1.jpg", "img/2.jpg", "img/3.jpg"];
-const VIDEO_LIST = ["vid/1.mp4", "vid/2.mp4", "vid/3.mp4"];
-const WORDS = [{word:"GUITARE"},{word:"ELEPHANT"},{word:"PIZZA"}];
+const IMAGE_LIST = ["img/1.jpg", "img/2.jpg", "img/3.jpg", "img/4.jpg", "img/5.jpg"];
+const VIDEO_LIST = ["vid/1.mp4", "vid/2.mp4", "vid/3.mp4", "vid/4.mp4"];
+const WORDS = [
+    {word:"GUITARE", cat:"Musique", hint:"Elle a 6 cordes"},
+    {word:"ELEPHANT", cat:"Animaux", hint:"Une très longue trompe"},
+    {word:"PIZZA", cat:"Cuisine", hint:"Spécialité italienne"},
+    {word:"FUSEE", cat:"Espace", hint:"Objectif : la Lune"},
+    {word:"VOLCAN", cat:"Nature", hint:"Il crache de la lave"}
+];
 const ROWS = [['A','Z','E','R','T','Y','U','I','O','P'],['Q','S','D','F','G','H','J','K','L','M'],['W','X','C','V','B','N']];
 const PARTS = ['p-head','p-body','p-larm','p-rarm','p-lleg','p-rleg'];
 
-let W, G, E, winStreak = 0;
+let W, G, E, C, H, winStreak = 0;
 
 function newGame() {
-  const e = WORDS[Math.floor(Math.random()*WORDS.length)];
-  W = e.word; G = new Set(); E = 0;
-  document.getElementById('overlay').classList.add('hidden');
-  document.querySelectorAll('.reward-btn').forEach(b => b.style.display = 'none');
-  render();
+    const e = WORDS[Math.floor(Math.random()*WORDS.length)];
+    W = e.word; C = e.cat; H = e.hint; G = new Set(); E = 0;
+    document.getElementById('overlay').classList.add('hidden');
+    document.querySelectorAll('.reward-btn').forEach(b => b.style.display = 'none');
+    render();
 }
 
 function guess(l) {
-  if (G.has(l)) return;
-  G.add(l);
-  if (!W.includes(l)) E++;
-  if ([...W].every(x => G.has(x))) { winStreak++; setTimeout(()=>end(true), 400); }
-  else if (E >= 6) { winStreak = 0; setTimeout(()=>end(false), 400); }
-  render();
+    if (G.has(l) || E >= 6) return;
+    G.add(l);
+    if (!W.includes(l)) E++;
+    if ([...W].every(x => G.has(x))) { winStreak++; setTimeout(()=>end(true), 400); }
+    else if (E >= 6) { winStreak = 0; setTimeout(()=>end(false), 400); }
+    render();
 }
 
 function end(won) {
-  document.getElementById('overlay-emoji').textContent = won ? '🎉' : '💀';
-  document.getElementById('overlay-title').textContent = won ? 'BRAVO' : 'PERDU';
-  if (won && winStreak % 2 === 0) {
-    document.getElementById('btn-img').style.display = 'block';
-    document.getElementById('target-img').src = IMAGE_LIST[Math.floor(Math.random()*IMAGE_LIST.length)];
-  } else if (!won) {
-    document.getElementById('btn-vid').style.display = 'block';
-    document.getElementById('target-vid').src = VIDEO_LIST[Math.floor(Math.random()*VIDEO_LIST.length)];
-  }
-  document.getElementById('overlay').classList.remove('hidden');
+    document.getElementById('overlay-emoji').textContent = won ? '🎉' : '💀';
+    document.getElementById('overlay-title').textContent = won ? 'BRAVO' : 'PERDU';
+    document.getElementById('overlay-msg').textContent = won ? '' : 'Le mot était : ' + W;
+    
+    if (won && winStreak % 2 === 0) {
+        document.getElementById('btn-img').style.display = 'block';
+        document.getElementById('target-img').src = IMAGE_LIST[Math.floor(Math.random()*IMAGE_LIST.length)];
+    } else if (!won) {
+        document.getElementById('btn-vid').style.display = 'block';
+        document.getElementById('target-vid').src = VIDEO_LIST[Math.floor(Math.random()*VIDEO_LIST.length)];
+    }
+    document.getElementById('overlay').classList.remove('hidden');
 }
 
 function render() {
-  PARTS.forEach((id,i) => document.getElementById(id).style.opacity = E > i ? '1' : '0');
-  const wd = document.getElementById('word-display'); wd.innerHTML = '';
-  for (const l of W) {
-    const s=document.createElement('div'); s.className='letter-slot';
-    const ch=document.createElement('div'); ch.className='letter-char'; ch.textContent = G.has(l) ? l : '';
-    const ln=document.createElement('div'); ln.className='letter-line'+(G.has(l)?' revealed':'');
-    s.appendChild(ch); s.appendChild(ln); wd.appendChild(s);
-  }
-  const kb = document.getElementById('keyboard'); kb.innerHTML = '';
-  ROWS.forEach(row => {
-    const r=document.createElement('div'); r.className='key-row';
-    row.forEach(l => {
-      const b=document.createElement('button'); b.className='key'; b.textContent=l;
-      if(G.has(l)) b.classList.add(W.includes(l)?'correct':'wrong');
-      b.onclick = () => guess(l); r.appendChild(b);
+    document.getElementById('category-display').textContent = C;
+    document.getElementById('hint-display').textContent = E >= 2 ? "💡 " + H : "";
+    PARTS.forEach((id,i) => document.getElementById(id).style.opacity = E > i ? '1' : '0');
+    
+    const wd = document.getElementById('word-display'); wd.innerHTML = '';
+    for (const l of W) {
+        const s=document.createElement('div'); s.className='letter-slot';
+        const ch=document.createElement('div'); ch.className='letter-char'; ch.textContent = G.has(l) ? l : '';
+        const ln=document.createElement('div'); ln.className='letter-line'+(G.has(l)?' revealed':'');
+        s.appendChild(ch); s.appendChild(ln); wd.appendChild(s);
+    }
+    
+    const kb = document.getElementById('keyboard'); kb.innerHTML = '';
+    ROWS.forEach(row => {
+        const r=document.createElement('div'); r.className='key-row';
+        row.forEach(l => {
+            const b=document.createElement('button'); b.className='key'; b.textContent=l;
+            if(G.has(l)) b.classList.add(W.includes(l)?'correct':'wrong');
+            b.onclick = () => guess(l); r.appendChild(b);
+        });
+        kb.appendChild(r);
     });
-    kb.appendChild(r);
-  });
 }
 
 function stopVid() { 
     const v = document.getElementById('target-vid');
-    v.pause();
-    v.src = ""; // Force l'arrêt du flux audio/vidéo
-    v.load();
+    v.pause(); v.src = ""; v.load();
     document.getElementById('fs-vid').style.display = 'none'; 
     newGame(); 
 }
@@ -160,7 +192,6 @@ document.getElementById('btn-img').onclick = () => document.getElementById('fs-i
 document.getElementById('btn-vid').onclick = () => { 
     document.getElementById('fs-vid').style.display='flex'; 
     const v = document.getElementById('target-vid');
-    v.src = VIDEO_LIST[Math.floor(Math.random()*VIDEO_LIST.length)];
     v.load(); v.play(); 
 };
 
@@ -169,8 +200,8 @@ document.getElementById('play-again-btn').onclick = newGame;
 const tracks = ['01.mp3', '02.mp3', '03.mp3'];
 let tIdx = 0; const player = new Audio();
 document.getElementById('music-btn').onclick = function() {
-  if(player.paused) { player.src=tracks[tIdx]; player.play(); this.textContent='🔇 Stop'; }
-  else { player.pause(); this.textContent='🎵 Musique'; }
+    if(player.paused) { player.src=tracks[tIdx]; player.play(); this.textContent='🔇 STOP'; }
+    else { player.pause(); this.textContent='🎵 MUSIQUE'; }
 };
 document.getElementById('next-btn').onclick = () => { tIdx=(tIdx+1)%tracks.length; player.src=tracks[tIdx]; player.play(); };
 
