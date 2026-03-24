@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f0c1a">
+<title>Le Pendu - Récompense</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0c1a;
+  --accent: #e8ff47;
+  --accent2: #ff4757;
+  --accent3: #48dbfb;
+  --text: #f0ebff;
+  --muted: rgba(240,235,255,0.35);
+  --card: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.08);
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+html, body {
+  height: 100%; background: var(--bg); color: var(--text);
+  font-family: 'DM Serif Display', serif; overflow: hidden; touch-action: manipulation;
+}
+
+/* ... (Conservation de ton style d'origine) ... */
+.app { position: relative; z-index: 1; height: 100dvh; display: flex; flex-direction: column; align-items: center; padding: 8px 12px 4px; max-width: 480px; margin: 0 auto; }
+.header { width: 100%; display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.game-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.9rem; letter-spacing: 0.15em; color: var(--accent); }
+.score-val { font-family:'Bebas Neue',sans-serif; font-size:1.4rem; color:var(--accent3); }
+.category-pill { display:inline-flex; align-items:center; gap:6px; background:var(--card); border:1px solid var(--border); padding:4px 14px; border-radius:100px; font-family:'DM Mono',monospace; font-size:1.05rem; margin-bottom:4px; }
+.cat-dot { width:5px; height:5px; border-radius:50%; background:var(--accent); }
+.gallows-wrap { width:100%; display:flex; justify-content:center; margin-bottom:4px; }
+#gallows-svg { width:180px; height:130px; }
+.attempts-bar { display:flex; gap:6px; margin-bottom:6px; }
+.attempt-dot { width:8px; height:8px; border-radius:50%; background:var(--accent2); transition:0.3s; }
+.attempt-dot.used { background:rgba(255,255,255,0.1); }
+.word-display { display:flex; gap:8px; justify-content:center; width:100%; margin-bottom:6px; min-height:44px; }
+.letter-char { font-size:1.7rem; color:var(--text); text-align:center; min-width:26px; }
+.letter-char.revealed { color:var(--accent); }
+.letter-line { height:2px; background:rgba(255,255,255,0.2); width:26px; }
+.hint-row { font-family:'DM Mono',monospace; font-size:1.05rem; color:var(--accent3); margin-bottom:6px; min-height:20px; }
+.keyboard { width:100%; display:flex; flex-direction:column; gap:5px; }
+.key-row { display:flex; justify-content:center; gap:4px; }
+.key { background:var(--card); border:1px solid var(--border); color:var(--text); width:34px; height:40px; border-radius:6px; font-family:'DM Mono',monospace; }
+.key.correct { border-color:var(--accent); color:var(--accent); }
+.key.wrong { opacity:0.3; }
+
+/* Styles de l'Overlay et Récompense */
+.overlay { position:fixed; inset:0; background:rgba(15,12,26,0.95); backdrop-filter:blur(12px); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:50; gap:20px; padding:32px; transition:0.4s; }
+.overlay.hidden { opacity:0; pointer-events:none; }
+.overlay-title { font-family:'Bebas Neue',sans-serif; font-size:3rem; }
+.overlay-title.win { color:var(--accent); }
+.overlay-title.lose { color:var(--accent2); }
+
+.btn-main { background:var(--accent); color:var(--bg); border:none; padding:14px 40px; font-family:'Bebas Neue',sans-serif; font-size:1.4rem; border-radius:4px; cursor:pointer; }
+.btn-reward { background:var(--accent3); box-shadow: 0 0 20px rgba(72,219,251,0.4); }
+
+/* Plein écran image */
+#reward-screen { position:fixed; inset:0; background:#000; z-index:100; display:none; align-items:center; justify-content:center; cursor:pointer; }
+#reward-screen img { max-width:100%; max-height:100%; object-fit:contain; }
+
+.audio-btn { position:fixed; right:14px; background:rgba(232,255,71,0.08); border:1px solid rgba(232,255,71,0.35); color:#e8ff47; padding:7px 12px; border-radius:100px; font-family:'DM Mono',monospace; font-size:0.65rem; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <div class="game-title">LE PENDU</div>
+    <div class="score-badge">
+      <span class="score-val" id="score">0</span>
+    </div>
+  </div>
+
+  <div class="category-pill"><div class="cat-dot"></div><span id="category-label">—</span></div>
+
+  <div class="gallows-wrap">
+    <svg id="gallows-svg" viewBox="0 0 220 160">
+      <line x1="20" y1="155" x2="200" y2="155" stroke="rgba(255,255,255,0.15)" stroke-width="3"/>
+      <line x1="60" y1="155" x2="60"  y2="10"  stroke="rgba(255,255,255,0.15)" stroke-width="3"/>
+      <line x1="60" y1="10"  x2="140" y2="10"  stroke="rgba(255,255,255,0.15)" stroke-width="3"/>
+      <line x1="140" y1="10" x2="140" y2="30"  stroke="rgba(255,255,255,0.15)" stroke-width="2" stroke-dasharray="4 3"/>
+      <circle id="p-head" cx="140" cy="44" r="14" stroke="#ff4757" stroke-width="2.5" opacity="0"/>
+      <line id="p-body" x1="140" y1="58" x2="140" y2="100" stroke="#ff4757" stroke-width="2.5" opacity="0"/>
+      <line id="p-larm" x1="140" y1="70" x2="118" y2="90" stroke="#ff4757" stroke-width="2.5" opacity="0"/>
+      <line id="p-rarm" x1="140" y1="70" x2="162" y2="90" stroke="#ff4757" stroke-width="2.5" opacity="0"/>
+      <line id="p-lleg" x1="140" y1="100" x2="118" y2="130" stroke="#ff4757" stroke-width="2.5" opacity="0"/>
+      <line id="p-rleg" x1="140" y1="100" x2="162" y2="130" stroke="#ff4757" stroke-width="2.5" opacity="0"/>
+    </svg>
+  </div>
+
+  <div class="attempts-bar" id="attempts-bar"></div>
+  <div class="word-display"  id="word-display"></div>
+  <div class="hint-row"      id="hint-row"></div>
+  <div class="keyboard"      id="keyboard"></div>
+</div>
+
+<div class="overlay hidden" id="overlay">
+  <div id="overlay-emoji" style="font-size:4rem"></div>
+  <div class="overlay-title" id="overlay-title"></div>
+  <div id="overlay-word" style="color:var(--muted)"></div>
+  
+  <button class="btn-main" id="play-again-btn">REJOUER</button>
+  <button class="btn-main btn-reward" id="view-reward-btn" style="display:none">VOIR L'IMAGE</button>
+</div>
+
+<div id="reward-screen">
+  <img src="" id="reward-img">
+</div>
+
+<button class="audio-btn" id="music-btn" style="bottom:52px">🎵 Musique</button>
+<button class="audio-btn" id="next-btn"  style="bottom:14px">⏭ Next</button>
+
+<script>
+// --- CONFIGURATION IMAGES ---
+const IMAGE_BANK = ["img/1.jpg", "img/2.jpg", "img/3.jpg", "img/4.jpg"]; 
+
+// --- DONNÉES ET LOGIQUE ---
+const WORDS = [
+  { word:"ELEPHANT", cat:"Animaux", hint:"Le plus grand mammifère terrestre" },
+  { word:"VOLCAN", cat:"Nature", hint:"Crache de la lave" },
+  { word:"GUITARE", cat:"Musique", hint:"Instrument à cordes pincées" },
+  { word:"PIZZA", cat:"Nourriture", hint:"Spécialité italienne ronde" }
+  // Ajoute tes autres mots ici...
+];
+
+const ROWS = [['A','Z','E','R','T','Y','U','I','O','P'],['Q','S','D','F','G','H','J','K','L','M'],['W','X','C','V','B','N']];
+const PARTS = ['p-head','p-body','p-larm','p-rarm','p-lleg','p-rleg'];
+
+let score = 0, winStreak = 0, currentWord = {}, guessedLetters = new Set(), errors = 0, isGameOver = false;
+let availableImages = [];
+
+function shuffle(a) {
+  let b = [...a];
+  for (let i = b.length-1; i > 0; i--) {
+    let j = Math.floor(Math.random()*(i+1));
+    [b[i],b[j]] = [b[j],b[i]];
+  }
+  return b;
+}
+
+function initImages() { availableImages = shuffle(IMAGE_BANK); }
+initImages();
+
+function newGame() {
+  currentWord = WORDS[Math.floor(Math.random()*WORDS.length)];
+  guessedLetters = new Set();
+  errors = 0;
+  isGameOver = false;
+  document.getElementById('overlay').classList.add('hidden');
+  render();
+}
+
+function guess(l) {
+  if (isGameOver || guessedLetters.has(l)) return;
+  guessedLetters.add(l);
+  if (!currentWord.word.includes(l)) errors++;
+  
+  const won = [...currentWord.word].every(x => guessedLetters.has(x));
+  if (won) {
+    score += Math.max(10, 50 - errors * 8);
+    winStreak++;
+    isGameOver = true;
+    setTimeout(() => showEnd(true), 400);
+  } else if (errors >= 6) {
+    winStreak = 0;
+    isGameOver = true;
+    setTimeout(() => showEnd(false), 400);
+  }
+  render();
+}
+
+function showEnd(won) {
+  const overlay = document.getElementById('overlay');
+  const btnPlay = document.getElementById('play-again-btn');
+  const btnReward = document.getElementById('view-reward-btn');
+  
+  document.getElementById('overlay-emoji').textContent = won ? '🎉' : '💀';
+  const t = document.getElementById('overlay-title');
+  t.textContent = won ? 'BRAVO !' : 'PERDU !';
+  t.className = 'overlay-title ' + (won ? 'win' : 'lose');
+  document.getElementById('overlay-word').innerHTML = won ? 'Score : <span>+' + Math.max(10,50-errors*8) + ' pts</span>' : 'Le mot était : <span>' + currentWord.word + '</span>';
+
+  // Logique de récompense
+  if (won && winStreak > 0 && winStreak % 3 === 0) {
+    btnPlay.style.display = 'none';
+    btnReward.style.display = 'block';
+    
+    if (availableImages.length === 0) initImages();
+    const imgPath = availableImages.pop();
+    document.getElementById('reward-img').src = imgPath;
+  } else {
+    btnPlay.style.display = 'block';
+    btnReward.style.display = 'none';
+  }
+  
+  overlay.classList.remove('hidden');
+}
+
+function render() {
+  document.getElementById('score').textContent = score;
+  document.getElementById('category-label').textContent = currentWord.cat;
+  document.getElementById('hint-row').textContent = errors >= 2 ? '💡 ' + currentWord.hint : '';
+  
+  PARTS.forEach((id, i) => document.getElementById(id).style.opacity = errors > i ? '1' : '0');
+
+  const wd = document.getElementById('word-display');
+  wd.innerHTML = '';
+  [...currentWord.word].forEach(l => {
+    const slot = document.createElement('div');
+    slot.innerHTML = `<div class="letter-char">${guessedLetters.has(l) ? l : (isGameOver ? l : '&nbsp;')}</div><div class="letter-line ${guessedLetters.has(l)?'revealed':''}"></div>`;
+    wd.appendChild(slot);
+  });
+
+  const kb = document.getElementById('keyboard');
+  kb.innerHTML = '';
+  ROWS.forEach(row => {
+    const r = document.createElement('div'); r.className = 'key-row';
+    row.forEach(l => {
+      const b = document.createElement('button'); b.className = 'key'; b.textContent = l;
+      if (guessedLetters.has(l)) b.classList.add(currentWord.word.includes(l) ? 'correct' : 'wrong');
+      b.onclick = () => guess(l);
+      r.appendChild(b);
+    });
+    kb.appendChild(r);
+  });
+}
+
+// Interaction récompense
+document.getElementById('view-reward-btn').onclick = () => document.getElementById('reward-screen').style.display = 'flex';
+document.getElementById('reward-screen').onclick = () => {
+  document.getElementById('reward-screen').style.display = 'none';
+  document.getElementById('view-reward-btn').style.display = 'none';
+  document.getElementById('play-again-btn').style.display = 'block';
+};
+
+document.getElementById('play-again-btn').onclick = newGame;
+newGame();
+</script>
+</body>
+</html>
