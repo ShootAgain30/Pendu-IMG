@@ -1,5 +1,5 @@
 ```js
-const CACHE = 'pendu-v1.0.4';
+const CACHE = 'pendu-v1.0.5';
 
 const FILES = [
   '/',
@@ -11,10 +11,10 @@ const FILES = [
   '02.mp3',
   '03.mp3',
   'img/1.jpg',
-  'img/2.jpg',
-  'img/3.jpg',
-  'img/4.jpg',
-  'img/5.jpg',
+  'img/2.png',
+  'img/3.png',
+  'img/4.png',
+  'img/5.png',
   'img/6.jpg',
   'vid/1.mp4',
   'vid/2.mp4',
