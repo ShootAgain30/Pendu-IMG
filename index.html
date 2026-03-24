@@ -438,7 +438,7 @@ function render() {
 document.getElementById('play-again-btn').addEventListener('click', newGame);
 document.addEventListener('keydown', e => { const l=e.key.toUpperCase(); if(/^[A-Z]$/.test(l)) guess(l); });
 
-// ── Bouton image  ───────────────────────────────
+// ── Bouton image ───────────────────────────────
 document.getElementById('img-btn').addEventListener('click', function() {
   const n = pickImg(); // numéro de l'image
   const imgEl = document.getElementById('img-el');
@@ -447,15 +447,12 @@ document.getElementById('img-btn').addEventListener('click', function() {
   // affiche immédiatement la visionneuse
   viewer.classList.remove('hidden');
 
-  // reset src pour forcer le reload même si la même image est utilisée
-  imgEl.src = '';
+  // debug : log si ça charge
+  imgEl.onload  = () => console.log('Image ' + n + ' OK');
+  imgEl.onerror = () => console.error('Erreur chargement image ' + n);
 
   // charge l'image
   imgEl.src = 'img/' + n + '.jpg';
-
-  // debug : affiche dans la console si ça charge
-  imgEl.onload  = () => console.log('Image ' + n + ' OK');
-  imgEl.onerror = () => console.error('Erreur chargement image ' + n);
 });
 
 // ── Clic/touch sur l'image → ferme et reprend le jeu ──
