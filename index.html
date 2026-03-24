@@ -334,7 +334,7 @@ function end(won) {
     : 'Le mot\u00A0était\u00A0: <span>' + W + '</span>';
 
   // Condition récompense : gagné ET multiple de 3
-  if (won && winStreak > 0 && winStreak % 3 === 0) {
+  if (won && winStreak > 0 && winStreak % 2 === 0) {
     btnRejouer.style.display = 'none';
     btnReward.style.display = 'block';
     
