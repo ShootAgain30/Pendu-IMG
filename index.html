@@ -146,20 +146,19 @@ body::before {
   border-radius:4px; transition:all 0.2s;
   box-shadow:0 0 30px rgba(232,255,71,0.3);
 }
-.play-again-btn:hover { transform:translateY(-2px); box-shadow:0 0 50px rgba(232,255,71,0.5); }
 
-/* --- STYLE RECOMPENSE --- */
+/* Styles Récompenses */
 .reward-btn {
-  background: var(--accent3); color: var(--bg); border: none;
-  padding: 14px 40px; font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.4rem; letter-spacing: 0.15em; cursor: pointer;
-  border-radius: 4px; box-shadow: 0 0 30px rgba(72,219,251,0.3);
+  background:var(--accent3); color:var(--bg); border:none;
+  padding:14px 40px; font-family:'Bebas Neue',sans-serif;
+  font-size:1.4rem; letter-spacing:0.15em; cursor:pointer;
+  border-radius:4px; display:none;
 }
 .reward-fullscreen {
-  position: fixed; inset: 0; background: #000; z-index: 1000;
-  display: none; align-items: center; justify-content: center;
+  position:fixed; inset:0; background:#000; z-index:1000;
+  display:none; align-items:center; justify-content:center;
 }
-.reward-fullscreen img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.reward-fullscreen img, .reward-fullscreen video { max-width:100%; max-height:100%; }
 
 .audio-btn {
   position:fixed; right:14px; z-index:99;
@@ -169,7 +168,6 @@ body::before {
   padding:7px 12px; border-radius:100px;
   cursor:pointer; transition:all 0.2s;
 }
-.audio-btn:active { transform:scale(0.95); }
 </style>
 </head>
 <body>
@@ -214,91 +212,49 @@ body::before {
   <div class="overlay-title" id="overlay-title"></div>
   <div class="overlay-word"  id="overlay-word"></div>
   <button class="play-again-btn" id="play-again-btn">REJOUER</button>
-  <button class="reward-btn" id="reward-btn" style="display:none">VOIR L'IMAGE</button>
+  <button class="reward-btn" id="reward-img-btn">VOIR L'IMAGE</button>
+  <button class="reward-btn" id="reward-vid-btn" style="background:var(--accent2)">VOIR LA VIDÉO</button>
 </div>
 
-<div id="reward-fullscreen" class="reward-fullscreen">
-  <img src="" id="reward-img">
-</div>
+<div id="fs-img" class="reward-fullscreen"><img id="img-target"></div>
+<div id="fs-vid" class="reward-fullscreen"><video id="vid-target" controls playsinline></video></div>
 
 <button class="audio-btn" id="music-btn" style="bottom:52px">🎵 Musique</button>
 <button class="audio-btn" id="next-btn"  style="bottom:14px">⏭ Next</button>
 
 <script>
-// --- CONFIGURATION IMAGES ---
-const IMAGE_LIST = ["img/1.jpg", "img/2.jpg", "img/3.jpg", "img/4.jpg"]; // Ajoute tes noms de fichiers ici
+// CONFIGURATIONS
+const IMAGE_LIST = ["img/1.jpg", "img/2.jpg", "img/3.jpg", "img/4.jpg", "img/5.jpg", "img/6.jpg", "img/7.jpg", "img/8.jpg", "img/9.jpg", "img/10.jpg", "img/11.jpg"];
+const VIDEO_LIST = ["vid/1.mp4", "vid/2.mp4", "vid/3.mp4", "vid/4.mp4", "vid/5.mp4", "vid/6.mp4"];
 
 const WORDS = [
-  { word:"ELEPHANT",   cat:"Animaux",      hint:"Le plus grand mammifère terrestre" },
-  { word:"VOLCAN",     cat:"Nature",        hint:"Crache de la lave" },
-  { word:"GUITARE",    cat:"Musique",       hint:"Instrument à cordes pincées" },
-  { word:"PYRAMIDE",   cat:"Histoire",      hint:"Tombeau des pharaons" },
-  { word:"CHOCOLAT",   cat:"Nourriture",    hint:"Fait du cacao" },
-  { word:"DALMATIEN",  cat:"Animaux",       hint:"Chien tacheté de noir" },
-  { word:"FUSEE",      cat:"Espace",        hint:"Va dans les étoiles" },
-  { word:"CROCODILE",  cat:"Animaux",       hint:"Reptile des marais" },
-  { word:"PARACHUTE",  cat:"Sport",         hint:"Ralentit la chute" },
-  { word:"DIAMANT",    cat:"Minéraux",      hint:"La pierre la plus dure" },
-  { word:"AURORE",     cat:"Nature",        hint:"Lumières polaires colorées" },
-  { word:"VAMPIRE",    cat:"Fantastique",   hint:"Craint l'ail et le soleil" },
-  { word:"CERISIER",   cat:"Arbres",        hint:"Fleurit en rose au Japon" },
-  { word:"TORNADE",    cat:"Météo",         hint:"Colonne d'air en rotation" },
-  { word:"SORCIERE",   cat:"Fantastique",   hint:"Chevauche un balai" },
-  { word:"MANCHOT",    cat:"Animaux",       hint:"Pingouin qui ne vole pas" },
-  { word:"TAMBOUR",    cat:"Musique",       hint:"Instrument à percussion" },
-  { word:"REQUIN",     cat:"Animaux",       hint:"Prédateur des océans" },
-  { word:"CHATEAU",    cat:"Architecture",  hint:"Résidence médiévale fortifiée" },
-  { word:"DRAGON",     cat:"Fantastique",   hint:"Crache du feu et vole" },
-  { word:"GIRAFE",     cat:"Animaux",       hint:"A le cou le plus long" },
-  { word:"LICORNE",    cat:"Fantastique",   hint:"Cheval avec une corne magique" },
-  { word:"PIZZA",      cat:"Nourriture",    hint:"Spécialité italienne ronde" },
-  { word:"DAUPHIN",    cat:"Animaux",       hint:"Mammifère marin très intelligent" },
-  { word:"CACTUS",     cat:"Nature",        hint:"Plante du désert avec des épines" },
-  { word:"ASTRONAUTE", cat:"Espace",        hint:"Pilote une navette spatiale" },
-  { word:"BOULANGER",  cat:"Métiers",       hint:"Fabrique le pain chaque matin" },
-  { word:"CASCADE",    cat:"Nature",        hint:"Chute d'eau naturelle" },
-  { word:"DETECTIVE",  cat:"Métiers",       hint:"Résout les mystères et enquêtes" },
-  { word:"ECUREUIL",   cat:"Animaux",       hint:"Grimpe aux arbres et mange des noisettes" },
-  { word:"FANTOME",    cat:"Fantastique",   hint:"Esprit invisible qui hante les maisons" },
-  { word:"GALAXIE",    cat:"Espace",        hint:"Immense groupe d'étoiles" },
-  { word:"HIBOU",      cat:"Animaux",       hint:"Oiseau nocturne qui fait ouhou" },
-  { word:"IGLOO",      cat:"Architecture",  hint:"Maison de glace des Inuits" },
-  { word:"JONGLEUR",   cat:"Spectacle",     hint:"Lance des balles en l'air" },
-  { word:"KOALA",      cat:"Animaux",       hint:"Mange des feuilles d'eucalyptus" },
-  { word:"LAGON",      cat:"Nature",        hint:"Mer calme entourée de coraux" },
-  { word:"MEDUSE",     cat:"Animaux",       hint:"Créature transparente des océans" },
-  { word:"NAUFRAGE",   cat:"Aventure",      hint:"Bateau coulé au fond de la mer" },
-  { word:"OURAGAN",    cat:"Météo",         hint:"Tempête tropicale très violente" },
-  { word:"PINGOUIN",   cat:"Animaux",       hint:"Oiseau noir et blanc qui ne vole pas" },
+  { word:"ELEPHANT", cat:"Animaux", hint:"Le plus grand mammifère terrestre" },
+  { word:"VOLCAN", cat:"Nature", hint:"Crache de la lave" },
+  { word:"GUITARE", cat:"Musique", hint:"Instrument à cordes pincées" },
+  { word:"PYRAMIDE", cat:"Histoire", hint:"Tombeau des pharaons" },
+  { word:"CHOCOLAT", cat:"Nourriture", hint:"Fait du cacao" }
 ];
 
-const ROWS  = [['A','Z','E','R','T','Y','U','I','O','P'],['Q','S','D','F','G','H','J','K','L','M'],['W','X','C','V','B','N']];
+const ROWS = [['A','Z','E','R','T','Y','U','I','O','P'],['Q','S','D','F','G','H','J','K','L','M'],['W','X','C','V','B','N']];
 const PARTS = ['p-head','p-body','p-larm','p-rarm','p-lleg','p-rleg'];
-const MAX   = 6;
+const MAX = 6;
 
-// Gestion banque d'images
-let availableImages = [];
-function resetImages() { availableImages = shuffle(IMAGE_LIST); }
-resetImages();
+// GESTION BANQUES
+function shuffle(a) { let b = [...a]; for (let i = b.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]]; } return b; }
+let qWords = [], qImgs = [], qVids = [];
+function pickWord() { if (!qWords.length) qWords = shuffle(WORDS); return qWords.shift(); }
+function pickImg() { if (!qImgs.length) qImgs = shuffle(IMAGE_LIST); return qImgs.pop(); }
+function pickVid() { if (!qVids.length) qVids = shuffle(VIDEO_LIST); return qVids.pop(); }
 
-function shuffle(a) {
-  const b = [...a];
-  for (let i = b.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]]; }
-  return b;
-}
-
-let queue = [];
-function pick() { if (!queue.length) queue = shuffle(WORDS); return queue.shift(); }
-
-// État
+// ETAT
 let W, H, C, G, E, S = 0, O, winStreak = 0;
 
 function newGame() {
-  const e = pick();
+  const e = pickWord();
   W = e.word.toUpperCase(); H = e.hint; C = e.cat;
   G = new Set(); E = 0; O = false;
   document.getElementById('overlay').classList.add('hidden');
-  document.getElementById('reward-btn').style.display = 'none';
+  document.querySelectorAll('.reward-btn').forEach(b => b.style.display = 'none');
   document.getElementById('play-again-btn').style.display = 'block';
   render();
 }
@@ -307,54 +263,55 @@ function guess(l) {
   if (O || G.has(l)) return;
   G.add(l);
   if (!W.includes(l)) E++;
-  if ([...W].every(x => G.has(x))) { 
-    S += Math.max(10, 50-E*8); 
-    winStreak++; 
-    O = true; 
-    setTimeout(()=>end(true), 400); 
-  }
-  else if (E >= MAX) { 
-    winStreak = 0; // Reset si perdu
-    O = true; 
-    setTimeout(()=>end(false), 400); 
-  }
+  if ([...W].every(x => G.has(x))) { S += Math.max(10, 50-E*8); winStreak++; O = true; setTimeout(()=>end(true), 400); }
+  else if (E >= MAX) { winStreak = 0; O = true; setTimeout(()=>end(false), 400); }
   render();
 }
 
 function end(won) {
   document.getElementById('overlay-emoji').textContent = won ? '🎉' : '💀';
   const t = document.getElementById('overlay-title');
-  const btnRejouer = document.getElementById('play-again-btn');
-  const btnReward = document.getElementById('reward-btn');
-
   t.textContent = won ? 'BRAVO !' : 'PERDU !';
   t.className = 'overlay-title ' + (won ? 'win' : 'lose');
-  document.getElementById('overlay-word').innerHTML = won
-    ? 'Score\u00A0: <span>+' + Math.max(10,50-E*8) + ' pts</span>'
-    : 'Le mot\u00A0était\u00A0: <span>' + W + '</span>';
+  document.getElementById('overlay-word').innerHTML = won 
+    ? 'Score : <span>+' + Math.max(10,50-E*8) + ' pts</span>'
+    : 'Le mot était : <span>' + W + '</span>';
 
-  // Condition récompense : gagné ET multiple de 3
+  const btnImg = document.getElementById('reward-img-btn');
+  const btnVid = document.getElementById('reward-vid-btn');
+  const btnRejouer = document.getElementById('play-again-btn');
+
   if (won && winStreak > 0 && winStreak % 2 === 0) {
     btnRejouer.style.display = 'none';
-    btnReward.style.display = 'block';
-    
-    // Tirage image sans répétition
-    if (availableImages.length === 0) resetImages();
-    const imgPath = availableImages.pop();
-    document.getElementById('reward-img').src = imgPath;
+    btnImg.style.display = 'block';
+    document.getElementById('img-target').src = pickImg();
+  } else if (!won) {
+    btnRejouer.style.display = 'none';
+    btnVid.style.display = 'block';
+    document.getElementById('vid-target').src = pickVid();
   }
 
   document.getElementById('overlay').classList.remove('hidden');
 }
 
-// Actions Récompense
-document.getElementById('reward-btn').onclick = () => {
-  document.getElementById('reward-fullscreen').style.display = 'flex';
+// EVENTS PLEIN ECRAN
+document.getElementById('reward-img-btn').onclick = () => document.getElementById('fs-img').style.display = 'flex';
+document.getElementById('fs-img').onclick = () => {
+  document.getElementById('fs-img').style.display = 'none';
+  document.getElementById('reward-img-btn').style.display = 'none';
+  document.getElementById('play-again-btn').style.display = 'block';
 };
 
-document.getElementById('reward-fullscreen').onclick = () => {
-  document.getElementById('reward-fullscreen').style.display = 'none';
-  document.getElementById('reward-btn').style.display = 'none';
+document.getElementById('reward-vid-btn').onclick = () => {
+  const fs = document.getElementById('fs-vid');
+  fs.style.display = 'flex';
+  document.getElementById('vid-target').play();
+};
+document.getElementById('fs-vid').onclick = () => {
+  const v = document.getElementById('vid-target');
+  v.pause();
+  document.getElementById('fs-vid').style.display = 'none';
+  document.getElementById('reward-vid-btn').style.display = 'none';
   document.getElementById('play-again-btn').style.display = 'block';
 };
 
@@ -374,11 +331,11 @@ function render() {
   wd.innerHTML = '';
   wd.className = 'word-display' + (W.length >= 9 ? ' long' : W.length >= 7 ? ' medium' : '');
   for (const l of W) {
-    const s  = document.createElement('div'); s.className = 'letter-slot';
+    const s = document.createElement('div'); s.className = 'letter-slot';
     const ch = document.createElement('div'); ch.className = 'letter-char';
-    if      (G.has(l)) { ch.textContent = l; ch.classList.add('revealed'); }
-    else if (O)        { ch.textContent = l; ch.classList.add('wrong'); }
-    else               { ch.textContent = '\u00A0'; }
+    if (G.has(l)) { ch.textContent = l; ch.classList.add('revealed'); }
+    else if (O) { ch.textContent = l; ch.classList.add('wrong'); }
+    else { ch.textContent = '\u00A0'; }
     const ln = document.createElement('div');
     ln.className = 'letter-line' + (G.has(l) ? ' revealed' : '');
     s.appendChild(ch); s.appendChild(ln); wd.appendChild(s);
@@ -389,9 +346,9 @@ function render() {
     const r = document.createElement('div'); r.className = 'key-row';
     for (const l of row) {
       const b = document.createElement('button'); b.className = 'key'; b.textContent = l;
-      if      (G.has(l))  { b.classList.add(W.includes(l) ? 'correct' : 'wrong'); b.disabled = true; }
-      else if (O)         { b.disabled = true; }
-      else                { b.addEventListener('click', ()=>guess(l)); }
+      if (G.has(l)) { b.classList.add(W.includes(l) ? 'correct' : 'wrong'); b.disabled = true; }
+      else if (O) { b.disabled = true; }
+      else { b.addEventListener('click', ()=>guess(l)); }
       r.appendChild(b);
     }
     kb.appendChild(r);
@@ -403,10 +360,10 @@ document.addEventListener('keydown', e => { const l=e.key.toUpperCase(); if(/^[A
 
 newGame();
 
-// Audio — totalement isolé
+// MUSIQUE
 (function() {
   try {
-    const tracks = ['01.mp3','02.mp3','03.mp3'];
+    const tracks = ['Foyer.mp3','K2000.mp3'];
     let idx = 0, on = false;
     const a = new Audio();
     a.preload = 'none';
@@ -425,19 +382,14 @@ newGame();
       if (a.paused) {
         if (!a.src || a.src === location.href) a.src = tracks[idx];
         a.play().then(function() { on=true; mb.textContent='🔇 Stop'; }).catch(()=>{});
-      } else {
-        a.pause(); on=false; mb.textContent='🎵 Musique';
-      }
+      } else { a.pause(); on=false; mb.textContent='🎵 Musique'; }
     });
     nb.addEventListener('click', function() {
       idx = (idx+1) % tracks.length;
       a.src = tracks[idx]; a.load();
       if (on) a.play().catch(()=>{});
     });
-  } catch(err) {
-    document.getElementById('music-btn').style.display='none';
-    document.getElementById('next-btn').style.display='none';
-  }
+  } catch(err) {}
 })();
 </script>
 </body>
