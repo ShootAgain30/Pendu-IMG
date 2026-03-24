@@ -205,7 +205,16 @@ function render() {
 }
 
 document.getElementById('btn-img').onclick = () => document.getElementById('fs-img').style.display='flex';
-document.getElementById('btn-vid').onclick = () => { document.getElementById('fs-vid').style.display='flex'; document.getElementById('target-vid').play(); };
+document.getElementById('btn-vid').onclick = () => {
+  const layer = document.getElementById('fs-vid');
+  const video = document.getElementById('target-vid');
+  
+  layer.style.display = 'flex';
+  video.load(); // Force le rafraîchissement du fichier vidéo
+  video.play().catch(err => {
+    console.log("Lecture automatique bloquée, l'utilisateur doit interagir.");
+  });
+};
 function stopVid() { const v=document.getElementById('target-vid'); v.pause(); v.currentTime=0; document.getElementById('fs-vid').style.display='none'; newGame(); }
 
 // Audio (01.mp3, 02.mp3, 03.mp3)
