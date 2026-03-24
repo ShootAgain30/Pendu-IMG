@@ -4,86 +4,49 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0f0c1a">
-<title>Le Pendu - Spécial</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>Le Pendu Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0f0c1a;
-  --accent: #e8ff47;
-  --accent2: #ff4757;
-  --accent3: #48dbfb;
-  --text: #f0ebff;
-  --muted: rgba(240,235,255,0.35);
-  --card: rgba(255,255,255,0.04);
-  --border: rgba(255,255,255,0.08);
+  --bg: #0f0c1a; --accent: #e8ff47; --accent2: #ff4757; --accent3: #48dbfb;
+  --text: #f0ebff; --card: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.08);
 }
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Serif Display', serif; overflow: hidden; }
 
-html, body {
-  height: 100%; background: var(--bg); color: var(--text);
-  font-family: 'DM Serif Display', serif; overflow: hidden; touch-action: manipulation;
-}
+.app { position: relative; z-index: 1; height: 100dvh; display: flex; flex-direction: column; align-items: center; padding: 8px 12px; max-width: 480px; margin: 0 auto; }
+.header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.game-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--accent); letter-spacing: 2px; }
+.score-val { font-family:'Bebas Neue',sans-serif; font-size: 1.4rem; color: var(--accent3); }
 
-body::before {
-  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
-  background:
-    radial-gradient(ellipse 80% 60% at 10% 0%, rgba(232,255,71,0.06) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 80% at 90% 100%, rgba(72,219,251,0.05) 0%, transparent 60%);
-}
+.category-pill { background: var(--card); border: 1px solid var(--border); padding: 4px 12px; border-radius: 100px; font-family: 'DM Mono', monospace; font-size: 0.9rem; margin-bottom: 8px; }
+#gallows-svg { width: 160px; height: 120px; margin-bottom: 5px; }
 
-.app {
-  position: relative; z-index: 1; height: 100dvh;
-  display: flex; flex-direction: column; align-items: center;
-  padding: 8px 12px 4px; max-width: 480px; margin: 0 auto;
-}
+.word-display { display: flex; gap: 6px; justify-content: center; margin-bottom: 10px; min-height: 40px; flex-wrap: wrap; }
+.letter-char { font-size: 1.6rem; text-align: center; min-width: 22px; height: 30px; }
+.letter-line { height: 2px; background: rgba(255,255,255,0.2); width: 22px; }
 
-.header { width: 100%; display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
-.game-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.9rem; letter-spacing: 0.15em; color: var(--accent); }
-.score-val { font-family:'Bebas Neue',sans-serif; font-size:1.4rem; color:var(--accent3); }
-
-.category-pill {
-  background:var(--card); border:1px solid var(--border);
-  padding:4px 14px; border-radius:100px; font-family:'DM Mono',monospace;
-  font-size:1.05rem; margin-bottom:4px;
-}
-
-#gallows-svg { width:180px; height:130px; }
-
-.word-display { display:flex; gap:8px; justify-content:center; margin-bottom:6px; min-height:44px; }
-.letter-char { font-size:1.7rem; color:var(--text); text-align:center; min-width:26px; }
-.letter-line { height:2px; background:rgba(255,255,255,0.2); width:26px; }
-.letter-line.revealed { background:var(--accent); }
-
-.keyboard { width:100%; display:flex; flex-direction:column; gap:5px; }
-.key-row { display:flex; justify-content:center; gap:4px; }
+/* CLAVIER HORIZONTAL */
+.keyboard { width: 100%; display: flex; flex-direction: column; gap: 6px; margin-top: auto; padding-bottom: 10px; }
+.key-row { display: flex; justify-content: center; gap: 4px; width: 100%; }
 .key {
-  background:var(--card); border:1px solid var(--border); color:var(--text);
-  width:34px; height:40px; border-radius:6px; font-family:'DM Mono',monospace;
+  background: var(--card); border: 1px solid var(--border); color: var(--text);
+  flex: 1; max-width: 38px; height: 42px; border-radius: 5px;
+  font-family: 'DM Mono', monospace; font-size: 1rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
 }
+.key:active { background: var(--accent); color: var(--bg); }
+.key[disabled] { opacity: 0.2; cursor: default; }
 
-.overlay {
-  position:fixed; inset:0; background:rgba(15,12,26,0.95); backdrop-filter:blur(10px);
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  z-index:50; gap:15px; text-align:center;
-}
-.hidden { display:none; }
+.overlay { position: fixed; inset: 0; background: rgba(15,12,26,0.98); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 50; gap: 15px; }
+.hidden { display: none; }
+.play-again-btn, .reward-btn { padding: 12px 25px; font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; border-radius: 4px; border: none; }
+.play-again-btn { background: var(--accent); color: var(--bg); }
+.reward-btn { background: var(--accent3); color: var(--bg); display: none; }
 
-.play-again-btn, .reward-btn {
-  padding:14px 30px; font-family:'Bebas Neue',sans-serif; font-size:1.3rem;
-  border-radius:4px; border:none; cursor:pointer;
-}
-.play-again-btn { background:var(--accent); color:var(--bg); }
-.reward-btn { background:var(--accent3); color:var(--bg); display:none; }
-
-.reward-fullscreen {
-  position:fixed; inset:0; background:#000; z-index:1000;
-  display:none; align-items:center; justify-content:center;
-}
-.audio-btn {
-  position:fixed; right:14px; background:rgba(232,255,71,0.1);
-  border:1px solid var(--accent); color:var(--accent);
-  padding:6px 12px; border-radius:20px; font-family:'DM Mono',monospace; font-size:0.7rem;
-}
+.reward-fullscreen { position: fixed; inset: 0; background: #000; z-index: 1000; display: none; align-items: center; justify-content: center; }
+.audio-controls { position: fixed; bottom: 10px; right: 10px; display: flex; flex-direction: column; gap: 8px; }
+.audio-btn { background: rgba(232,255,71,0.15); border: 1px solid var(--accent); color: var(--accent); padding: 8px 12px; border-radius: 20px; font-family: 'DM Mono', monospace; font-size: 0.7rem; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -93,23 +56,18 @@ body::before {
     <div class="game-title">LE PENDU</div>
     <div class="score-val" id="score">0</div>
   </div>
-
   <div class="category-pill" id="category-label">—</div>
-
-  <div class="gallows-wrap">
-    <svg id="gallows-svg" viewBox="0 0 220 160">
-      <line x1="20" y1="155" x2="200" y2="155" stroke="white" stroke-opacity="0.2" stroke-width="3"/>
-      <line x1="60" y1="155" x2="60"  y2="10"  stroke="white" stroke-opacity="0.2" stroke-width="3"/>
-      <line x1="60" y1="10"  x2="140" y2="10"  stroke="white" stroke-opacity="0.2" stroke-width="3"/>
-      <circle id="p-head" cx="140" cy="44" r="14" stroke="#ff4757" stroke-width="3" opacity="0"/>
-      <line id="p-body" x1="140" y1="58"  x2="140" y2="100" stroke="#ff4757" stroke-width="3" opacity="0"/>
-      <line id="p-larm" x1="140" y1="70"  x2="115" y2="90"  stroke="#ff4757" stroke-width="3" opacity="0"/>
-      <line id="p-rarm" x1="140" y1="70"  x2="165" y2="90"  stroke="#ff4757" stroke-width="3" opacity="0"/>
-      <line id="p-lleg" x1="140" y1="100" x2="120" y2="135" stroke="#ff4757" stroke-width="3" opacity="0"/>
-      <line id="p-rleg" x1="140" y1="100" x2="160" y2="135" stroke="#ff4757" stroke-width="3" opacity="0"/>
-    </svg>
-  </div>
-
+  <svg id="gallows-svg" viewBox="0 0 220 160">
+    <line x1="20" y1="155" x2="200" y2="155" stroke="white" stroke-opacity="0.2" stroke-width="3"/>
+    <line x1="60" y1="155" x2="60" y2="10" stroke="white" stroke-opacity="0.2" stroke-width="3"/>
+    <line x1="60" y1="10" x2="140" y2="10" stroke="white" stroke-opacity="0.2" stroke-width="3"/>
+    <circle id="p-head" cx="140" cy="44" r="14" stroke="#ff4757" stroke-width="3" opacity="0"/>
+    <line id="p-body" x1="140" y1="58" x2="140" y2="100" stroke="#ff4757" stroke-width="3" opacity="0"/>
+    <line id="p-larm" x1="140" y1="70" x2="115" y2="90" stroke="#ff4757" stroke-width="3" opacity="0"/>
+    <line id="p-rarm" x1="140" y1="70" x2="165" y2="90" stroke="#ff4757" stroke-width="3" opacity="0"/>
+    <line id="p-lleg" x1="140" y1="100" x2="120" y2="135" stroke="#ff4757" stroke-width="3" opacity="0"/>
+    <line id="p-rleg" x1="140" y1="100" x2="160" y2="135" stroke="#ff4757" stroke-width="3" opacity="0"/>
+  </svg>
   <div class="word-display" id="word-display"></div>
   <div class="keyboard" id="keyboard"></div>
 </div>
@@ -117,29 +75,26 @@ body::before {
 <div class="overlay hidden" id="overlay">
   <div id="overlay-emoji" style="font-size:3rem"></div>
   <div id="overlay-title" class="game-title" style="font-size:2.5rem"></div>
-  <div id="overlay-word" style="margin-bottom:10px"></div>
+  <div id="overlay-word"></div>
   <button class="play-again-btn" id="play-again-btn">REJOUER</button>
   <button class="reward-btn" id="img-btn">VOIR L'IMAGE</button>
   <button class="reward-btn" id="vid-btn" style="background:var(--accent2)">VOIR LA VIDÉO</button>
 </div>
 
-<div id="fs-img" class="reward-fullscreen"><img id="target-img"></div>
+<div id="fs-img" class="reward-fullscreen"><img id="target-img" style="max-width:100%"></div>
 <div id="fs-vid" class="reward-fullscreen"><video id="target-vid" controls playsinline style="width:100%"></video></div>
 
-<button class="audio-btn" id="music-btn" style="bottom:55px">🎵 Musique</button>
-<button class="audio-btn" id="next-btn" style="bottom:15px">⏭ Suivant</button>
+<div class="audio-controls">
+  <button class="audio-btn" id="music-btn">🎵 Musique</button>
+  <button class="audio-btn" id="next-btn">⏭ Suivant</button>
+</div>
 
 <script>
-// --- CONFIGURATIONS ---
 const IMAGE_LIST = ["img/1.jpg", "img/2.jpg", "img/3.jpg", "img/4.jpg", "img/5.jpg", "img/6.jpg", "img/7.jpg", "img/8.jpg", "img/9.jpg", "img/10.jpg", "img/11.jpg"];
 const VIDEO_LIST = ["vid/1.mp4", "vid/2.mp4", "vid/3.mp4", "vid/4.mp4", "vid/5.mp4", "vid/6.mp4"];
+const WORDS = [{word:"PYRAMIDE",cat:"Histoire"},{word:"GIRAFE",cat:"Animaux"},{word:"PIZZA",cat:"Cuisine"},{word:"GUITARE",cat:"Musique"}];
+const KB_LAYOUT = ["AZERTYUIOP", "QSDFGHJKLM", "WXCVBN"];
 
-const WORDS = [
-  { word:"PYRAMIDE", cat:"Histoire" }, { word:"GIRAFE", cat:"Animaux" }, 
-  { word:"PIZZA", cat:"Cuisine" }, { word:"GUITARE", cat:"Musique" }
-];
-
-// --- ETAT DU JEU ---
 let W, C, G, E, S=0, winStreak=0;
 const MAX = 6;
 const PARTS = ['p-head','p-body','p-larm','p-rarm','p-lleg','p-rleg'];
@@ -151,8 +106,7 @@ function newGame() {
   const item = WORDS[Math.floor(Math.random()*WORDS.length)];
   W = item.word; C = item.cat; G = new Set(); E = 0;
   document.getElementById('overlay').classList.add('hidden');
-  document.getElementById('img-btn').style.display = 'none';
-  document.getElementById('vid-btn').style.display = 'none';
+  document.querySelectorAll('.reward-btn').forEach(b => b.style.display = 'none');
   document.getElementById('play-again-btn').style.display = 'block';
   render();
 }
@@ -169,20 +123,15 @@ function guess(l) {
 function end(won) {
   document.getElementById('overlay-emoji').textContent = won ? '🎉' : '💀';
   document.getElementById('overlay-title').textContent = won ? 'BRAVO !' : 'PERDU !';
-  document.getElementById('overlay-word').innerHTML = won ? 'Score: ' + S : 'Le mot était: ' + W;
-  
-  const btnImg = document.getElementById('img-btn');
-  const btnVid = document.getElementById('vid-btn');
-  const btnRejouer = document.getElementById('play-again-btn');
-
+  document.getElementById('overlay-word').innerHTML = won ? 'Score: '+S : 'Le mot: '+W;
   if (won && winStreak > 0 && winStreak % 2 === 0) {
-    btnRejouer.style.display = 'none';
-    btnImg.style.display = 'block';
+    document.getElementById('img-btn').style.display = 'block';
+    document.getElementById('play-again-btn').style.display = 'none';
     if(!qImgs.length) qImgs = shuffle([...IMAGE_LIST]);
     document.getElementById('target-img').src = qImgs.pop();
   } else if (!won) {
-    btnRejouer.style.display = 'none';
-    btnVid.style.display = 'block';
+    document.getElementById('vid-btn').style.display = 'block';
+    document.getElementById('play-again-btn').style.display = 'none';
     if(!qVids.length) qVids = shuffle([...VIDEO_LIST]);
     document.getElementById('target-vid').src = qVids.pop();
   }
@@ -193,69 +142,43 @@ function render() {
   document.getElementById('score').textContent = S;
   document.getElementById('category-label').textContent = C;
   PARTS.forEach((p, i) => document.getElementById(p).style.opacity = E > i ? "1" : "0");
-  
   const display = document.getElementById('word-display');
   display.innerHTML = '';
   [...W].forEach(l => {
     const box = document.createElement('div');
-    box.innerHTML = `<div class="letter-char">${G.has(l) ? l : ''}</div><div class="letter-line"></div>`;
+    box.innerHTML = `<div class="letter-char">${G.has(l)?l:''}</div><div class="letter-line"></div>`;
     display.appendChild(box);
   });
-
   const kb = document.getElementById('keyboard');
   kb.innerHTML = '';
-  "AZERTYUIOPQSDFGHJKLMWXCVBN".split('').forEach(l => {
-    const b = document.createElement('button');
-    b.className = 'key'; b.textContent = l;
-    if (G.has(l)) b.style.opacity = "0.3";
-    b.onclick = () => guess(l);
-    kb.appendChild(b);
+  KB_LAYOUT.forEach(row => {
+    const rDiv = document.createElement('div'); rDiv.className = 'key-row';
+    row.split('').forEach(l => {
+      const b = document.createElement('button'); b.className = 'key'; b.textContent = l;
+      if (G.has(l)) b.disabled = true;
+      b.onclick = () => guess(l);
+      rDiv.appendChild(b);
+    });
+    kb.appendChild(rDiv);
   });
 }
 
-// --- RECOMPENSES ---
 document.getElementById('img-btn').onclick = () => document.getElementById('fs-img').style.display = 'flex';
-document.getElementById('fs-img').onclick = () => {
-  document.getElementById('fs-img').style.display = 'none';
-  document.getElementById('img-btn').style.display = 'none';
-  document.getElementById('play-again-btn').style.display = 'block';
-};
-
-document.getElementById('vid-btn').onclick = () => {
-  document.getElementById('fs-vid').style.display = 'flex';
-  document.getElementById('target-vid').play();
-};
-document.getElementById('fs-vid').onclick = () => {
-  document.getElementById('target-vid').pause();
-  document.getElementById('fs-vid').style.display = 'none';
-  document.getElementById('vid-btn').style.display = 'none';
-  document.getElementById('play-again-btn').style.display = 'block';
-};
-
+document.getElementById('fs-img').onclick = () => { document.getElementById('fs-img').style.display = 'none'; newGame(); };
+document.getElementById('vid-btn').onclick = () => { document.getElementById('fs-vid').style.display = 'flex'; document.getElementById('target-vid').play(); };
+document.getElementById('fs-vid').onclick = () => { document.getElementById('target-vid').pause(); document.getElementById('fs-vid').style.display = 'none'; newGame(); };
 document.getElementById('play-again-btn').onclick = newGame;
 
-// --- MUSIQUE ---
+// MUSIQUE (01.mp3, 02.mp3, 03.mp3)
 const tracks = ['01.mp3', '02.mp3', '03.mp3'];
-let tIdx = 0;
-const player = new Audio();
+let tIdx = 0; const player = new Audio();
 const mBtn = document.getElementById('music-btn');
-
 mBtn.onclick = () => {
-  if (player.paused) {
-    player.src = tracks[tIdx];
-    player.play().then(() => mBtn.textContent = '🔇 Stop');
-  } else {
-    player.pause();
-    mBtn.textContent = '🎵 Musique';
-  }
+  if (player.paused) { if(!player.src || player.src.includes('undefined')) player.src = tracks[tIdx]; player.play().then(()=>mBtn.textContent='🔇 Stop'); }
+  else { player.pause(); mBtn.textContent='🎵 Musique'; }
 };
-document.getElementById('next-btn').onclick = () => {
-  tIdx = (tIdx + 1) % tracks.length;
-  player.src = tracks[tIdx];
-  player.play();
-  mBtn.textContent = '🔇 Stop';
-};
-player.onended = () => { tIdx = (tIdx + 1) % tracks.length; player.src = tracks[tIdx]; player.play(); };
+document.getElementById('next-btn').onclick = () => { tIdx = (tIdx+1)%tracks.length; player.src = tracks[tIdx]; player.play(); mBtn.textContent='🔇 Stop'; };
+player.onended = () => { tIdx = (tIdx+1)%tracks.length; player.src = tracks[tIdx]; player.play(); };
 
 newGame();
 </script>
