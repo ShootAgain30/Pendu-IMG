@@ -1,4 +1,4 @@
-const CACHE = 'pendu-v1.0.2';
+const CACHE = 'pendu-v1.0.3';
 
 const FILES = [
   './',
