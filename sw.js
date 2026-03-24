@@ -1,0 +1,54 @@
+const CACHE = 'pendu-v1';
+
+const FILES = [
+  './',
+  './index.html',
+  './01.mp3',
+  './02.mp3',
+  './03.mp3',
+  './img/1.jpg',
+  './img/2.jpg',
+  './img/3.jpg',
+  './img/4.jpg',
+  './img/5.jpg',
+  './img/6.jpg',
+  './vid/1.mp4',
+  './vid/2.mp4',
+  './vid/3.mp4',
+  './vid/4.mp4',
+  './vid/5.mp4',
+  './vid/6.mp4',
+  './vid/7.mp4',
+];
+
+// Installation : mise en cache de tous les fichiers
+self.addEventListener('install', function(e) {
+  e.waitUntil(
+    caches.open(CACHE).then(function(cache) {
+      return cache.addAll(FILES);
+    })
+  );
+  self.skipWaiting();
+});
+
+// Activation : supprime les anciens caches
+self.addEventListener('activate', function(e) {
+  e.waitUntil(
+    caches.keys().then(function(keys) {
+      return Promise.all(
+        keys.filter(function(k) { return k !== CACHE; })
+            .map(function(k) { return caches.delete(k); })
+      );
+    })
+  );
+  self.clients.claim();
+});
+
+// Fetch : sert depuis le cache, sinon réseau
+self.addEventListener('fetch', function(e) {
+  e.respondWith(
+    caches.match(e.request).then(function(cached) {
+      return cached || fetch(e.request);
+    })
+  );
+});
