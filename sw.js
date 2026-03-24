@@ -3,6 +3,9 @@ const CACHE = 'pendu-v1.0.1';
 const FILES = [
   './',
   './index.html',
+  './manifest.json',
+  './Icon-192.png',
+  './Icon-512.png',
   './01.mp3',
   './02.mp3',
   './03.mp3',
