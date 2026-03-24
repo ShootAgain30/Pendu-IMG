@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Pendu Final</title>
+<title>Pendu Final Fix</title>
 <style>
 :root {
   --bg: #0f0c1a; --accent: #e8ff47; --accent2: #ff4757; --accent3: #48dbfb;
@@ -94,7 +94,6 @@ html, body { height: 100dvh; background: var(--bg); color: var(--text); font-fam
 </div>
 
 <script>
-// CHEMINS CORRIGÉS SANS ESPACES
 const IMAGE_LIST = ["img/1.jpg", "img/2.jpg", "img/3.jpg", "img/4.jpg", "img/5.jpg", "img/6.jpg", "img/7.jpg", "img/8.jpg", "img/9.jpg", "img/10.jpg", "img/11.jpg"];
 const VIDEO_LIST = ["vid/1.mp4", "vid/2.mp4", "vid/3.mp4", "vid/4.mp4", "vid/5.mp4", "vid/6.mp4", "vid/7.mp4"];
 
@@ -135,10 +134,8 @@ function end(won) {
     
     if (won && winStreak > 0 && winStreak % 2 === 0) {
         document.getElementById('btn-img').style.display = 'block';
-        document.getElementById('target-img').src = IMAGE_LIST[Math.floor(Math.random()*IMAGE_LIST.length)];
     } else if (!won) {
         document.getElementById('btn-vid').style.display = 'block';
-        document.getElementById('target-vid').src = VIDEO_LIST[Math.floor(Math.random()*VIDEO_LIST.length)];
     }
     document.getElementById('overlay').classList.remove('hidden');
 }
@@ -180,10 +177,18 @@ function stopImg() {
     newGame();
 }
 
-document.getElementById('btn-img').onclick = () => document.getElementById('fs-img').style.display='flex';
+// DECLENCHEMENT AU CLIC POUR EVITER LES ERREURS DE CHARGEMENT
+document.getElementById('btn-img').onclick = () => {
+    const imgPath = IMAGE_LIST[Math.floor(Math.random()*IMAGE_LIST.length)];
+    document.getElementById('target-img').src = imgPath;
+    document.getElementById('fs-img').style.display='flex';
+};
+
 document.getElementById('btn-vid').onclick = () => { 
-    document.getElementById('fs-vid').style.display='flex'; 
+    const vidPath = VIDEO_LIST[Math.floor(Math.random()*VIDEO_LIST.length)];
     const v = document.getElementById('target-vid');
+    v.src = vidPath;
+    document.getElementById('fs-vid').style.display='flex'; 
     v.load(); v.play(); 
 };
 
