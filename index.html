@@ -413,15 +413,19 @@ document.addEventListener('keydown', e => { const l=e.key.toUpperCase(); if(/^[A
 document.getElementById('img-btn').addEventListener('click', function() {
   const n = pickImg();
   const imgEl = document.getElementById('img-el');
+  const viewer = document.getElementById('img-viewer');
+  imgEl.onload  = function() { viewer.classList.remove('hidden'); };
+  imgEl.onerror = function() { viewer.classList.remove('hidden'); };
   imgEl.src = 'img/' + n + '.jpg';
-  document.getElementById('img-viewer').classList.remove('hidden');
 });
 
-// Clic sur image → ferme et reprend
-document.getElementById('img-el').addEventListener('click', function() {
+// Clic/touch sur image → ferme et reprend
+function closeImg() {
   document.getElementById('img-viewer').classList.add('hidden');
   newGame();
-});
+}
+document.getElementById('img-el').addEventListener('click',    closeImg);
+document.getElementById('img-el').addEventListener('touchend', function(e){ e.preventDefault(); closeImg(); });
 
 // Bouton vidéo
 document.getElementById('vid-btn').addEventListener('click', function() {
@@ -433,15 +437,17 @@ document.getElementById('vid-btn').addEventListener('click', function() {
   document.getElementById('vid-viewer').classList.remove('hidden');
 });
 
-// Clic sur vidéo → stop + ferme + reprend
-document.getElementById('vid-el').addEventListener('click', function() {
+// Clic/touch sur vidéo → stop + ferme + reprend
+function closeVid() {
   const vidEl = document.getElementById('vid-el');
   vidEl.pause();
-  vidEl.src = '';      // stoppe complètement, pas de lecture en arrière-plan
+  vidEl.src = '';
   vidEl.load();
   document.getElementById('vid-viewer').classList.add('hidden');
   newGame();
-});
+}
+document.getElementById('vid-el').addEventListener('click',    closeVid);
+document.getElementById('vid-el').addEventListener('touchend', function(e){ e.preventDefault(); closeVid(); });
 
 // ── Démarrage ────────────────────────────────────────────────
 newGame();
