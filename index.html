@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Le Pendu Complet</title>
+<title>Pendu Final</title>
 <style>
 :root {
   --bg: #0f0c1a; --accent: #e8ff47; --accent2: #ff4757; --accent3: #48dbfb;
@@ -14,15 +14,12 @@ html, body { height: 100dvh; background: var(--bg); color: var(--text); font-fam
 
 .app { height: 100dvh; display: flex; flex-direction: column; align-items: center; padding: 10px 15px; max-width: 480px; margin: 0 auto; }
 
-/* HEADER & THEME */
 .header { width: 100%; text-align: center; margin-bottom: 5px; }
 .category-box { display: inline-block; background: var(--card); border: 1px solid var(--border); padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; color: var(--accent3); text-transform: uppercase; letter-spacing: 1px; }
 
-/* POTENCE */
 .gallows-wrap { width:100%; display:flex; justify-content:center; margin-bottom:10px; flex-shrink: 1; min-height: 130px; }
 #gallows-svg { width:180px; height:140px; }
 
-/* INDICE ET MOT */
 .hint-row { height: 20px; margin-bottom: 10px; }
 #hint-display { font-style: italic; font-size: 0.9rem; color: var(--accent); text-align: center; }
 
@@ -32,32 +29,22 @@ html, body { height: 100dvh; background: var(--bg); color: var(--text); font-fam
 .letter-line { height:3px; background:rgba(255,255,255,0.2); width:24px; border-radius: 2px; }
 .letter-line.revealed { background:var(--accent); box-shadow: 0 0 10px var(--accent); }
 
-/* CONTENEUR BAS : CLAVIER PUIS AUDIO */
 .bottom-ui { margin-top: auto; width: 100%; display: flex; flex-direction: column; gap: 20px; padding-bottom: 35px; }
-
 .keyboard { display:flex; flex-direction:column; gap:8px; }
 .key-row { display:flex; justify-content:center; gap:5px; }
-.key { 
-  background:var(--card); border:1px solid var(--border); color:var(--text); 
-  width:36px; height:46px; border-radius:8px; display:flex; 
-  align-items:center; justify-content:center; font-size: 1rem; font-weight: bold;
-}
+.key { background:var(--card); border:1px solid var(--border); color:var(--text); width:36px; height:46px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size: 1rem; font-weight: bold; }
 .key.correct { color:var(--accent); border-color:var(--accent); background: rgba(232,255,71,0.1); }
-.key.wrong { opacity: 0.2; background: rgba(255,255,255,0.02); }
+.key.wrong { opacity: 0.2; }
 
 .audio-row { display: flex; justify-content: center; gap: 15px; }
-.audio-btn { 
-  background: rgba(232,255,71,0.05); border: 1px solid var(--accent); 
-  color: var(--accent); padding: 12px 22px; border-radius: 100px; font-size: 0.75rem; font-weight: bold;
-}
+.audio-btn { background: rgba(232,255,71,0.05); border: 1px solid var(--accent); color: var(--accent); padding: 12px 22px; border-radius: 100px; font-size: 0.75rem; font-weight: bold; }
 
-/* OVERLAYS */
 .overlay { position:fixed; inset:0; background:rgba(15,12,26,0.98); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:100; gap:25px; }
 .hidden { display:none; }
 .fs-layer { position:fixed; inset:0; background:#000; z-index:1000; display:none; align-items:center; justify-content:center; }
 .fs-layer video, .fs-layer img { width:100%; height:100%; object-fit:contain; }
 
-.close-fs { position: absolute; top: 25px; right: 25px; z-index: 1100; background: var(--accent2); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; font-size: 24px; font-weight: bold; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
+.close-fs { position: absolute; top: 25px; right: 25px; z-index: 1100; background: var(--accent2); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; font-size: 24px; font-weight: bold; }
 </style>
 </head>
 <body>
@@ -67,7 +54,6 @@ html, body { height: 100dvh; background: var(--bg); color: var(--text); font-fam
         <div style="font-size:1.4rem; font-weight:bold; color:var(--text); opacity:0.5; margin-bottom:8px;">PENDU</div>
         <div class="category-box" id="category-display">THEME</div>
     </div>
-
     <div class="gallows-wrap">
         <svg id="gallows-svg" viewBox="0 0 220 160">
             <line x1="20" y1="155" x2="200" y2="155" stroke="white" stroke-opacity="0.2" stroke-width="3"/>
@@ -81,10 +67,8 @@ html, body { height: 100dvh; background: var(--bg); color: var(--text); font-fam
             <line id="p-rleg" x1="140" y1="100" x2="162" y2="130" stroke="#ff4757" stroke-width="2.5" opacity="0"/>
         </svg>
     </div>
-
     <div class="hint-row"><div id="hint-display"></div></div>
     <div class="word-display" id="word-display"></div>
-
     <div class="bottom-ui">
         <div class="keyboard" id="keyboard"></div>
         <div class="audio-row">
@@ -103,15 +87,17 @@ html, body { height: 100dvh; background: var(--bg); color: var(--text); font-fam
     <button class="reward-btn" id="btn-vid" style="display:none; padding:18px 50px; background:var(--accent2); border:none; border-radius:8px; color:#fff; font-weight:bold;">VOIR VIDÉO</button>
 </div>
 
-<div id="fs-img" class="fs-layer" onclick="this.style.display='none'; newGame();"><img id="target-img"></div>
+<div id="fs-img" class="fs-layer" onclick="stopImg()"><img id="target-img"></div>
 <div id="fs-vid" class="fs-layer">
     <button class="close-fs" onclick="stopVid()">✕</button>
     <video id="target-vid" controls playsinline></video>
 </div>
 
 <script>
-const IMAGE_LIST = ["img/1.jpg", "img/2.jpg", "img/3.jpg", "img/4.jpg", "img/5.jpg"];
-const VIDEO_LIST = ["vid/1.mp4", "vid/2.mp4", "vid/3.mp4", "vid/4.mp4"];
+// CHEMINS CORRIGÉS SANS ESPACES
+const IMAGE_LIST = ["img/1.jpg", "img/2.jpg", "img/3.jpg", "img/4.jpg", "img/5.jpg", "img/6.jpg", "img/7.jpg", "img/8.jpg", "img/9.jpg", "img/10.jpg", "img/11.jpg"];
+const VIDEO_LIST = ["vid/1.mp4", "vid/2.mp4", "vid/3.mp4", "vid/4.mp4", "vid/5.mp4", "vid/6.mp4", "vid/7.mp4"];
+
 const WORDS = [
     {word:"GUITARE", cat:"Musique", hint:"Elle a 6 cordes"},
     {word:"ELEPHANT", cat:"Animaux", hint:"Une très longue trompe"},
@@ -119,6 +105,7 @@ const WORDS = [
     {word:"FUSEE", cat:"Espace", hint:"Objectif : la Lune"},
     {word:"VOLCAN", cat:"Nature", hint:"Il crache de la lave"}
 ];
+
 const ROWS = [['A','Z','E','R','T','Y','U','I','O','P'],['Q','S','D','F','G','H','J','K','L','M'],['W','X','C','V','B','N']];
 const PARTS = ['p-head','p-body','p-larm','p-rarm','p-lleg','p-rleg'];
 
@@ -146,7 +133,7 @@ function end(won) {
     document.getElementById('overlay-title').textContent = won ? 'BRAVO' : 'PERDU';
     document.getElementById('overlay-msg').textContent = won ? '' : 'Le mot était : ' + W;
     
-    if (won && winStreak % 2 === 0) {
+    if (won && winStreak > 0 && winStreak % 2 === 0) {
         document.getElementById('btn-img').style.display = 'block';
         document.getElementById('target-img').src = IMAGE_LIST[Math.floor(Math.random()*IMAGE_LIST.length)];
     } else if (!won) {
@@ -186,6 +173,11 @@ function stopVid() {
     v.pause(); v.src = ""; v.load();
     document.getElementById('fs-vid').style.display = 'none'; 
     newGame(); 
+}
+
+function stopImg() {
+    document.getElementById('fs-img').style.display = 'none';
+    newGame();
 }
 
 document.getElementById('btn-img').onclick = () => document.getElementById('fs-img').style.display='flex';
