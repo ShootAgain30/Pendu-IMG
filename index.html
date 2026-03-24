@@ -438,13 +438,19 @@ function render() {
 document.getElementById('play-again-btn').addEventListener('click', newGame);
 document.addEventListener('keydown', e => { const l=e.key.toUpperCase(); if(/^[A-Z]$/.test(l)) guess(l); });
 
-// Bouton image
+// Bouton image (CORRIGÉ)
 document.getElementById('img-btn').addEventListener('click', function() {
   const n = pickImg();
   const imgEl = document.getElementById('img-el');
   const viewer = document.getElementById('img-viewer');
-  imgEl.onload  = function() { viewer.classList.remove('hidden'); };
-  imgEl.onerror = function() { viewer.classList.remove('hidden'); };
+
+  // afficher immédiatement
+  viewer.classList.remove('hidden');
+
+  // reset (important)
+  imgEl.src = '';
+
+  // charger image
   imgEl.src = 'img/' + n + '.jpg';
 });
 
