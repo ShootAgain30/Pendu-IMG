@@ -22,8 +22,7 @@ const FILES = [
   'vid/4.mp4',
   'vid/5.mp4',
   'vid/6.mp4',
-  'vid/7.mp4',
-];
+  ];
 
 // INSTALL
 self.addEventListener('install', function(e) {
