@@ -437,23 +437,24 @@ function render() {
 document.getElementById('play-again-btn').addEventListener('click', newGame);
 document.addEventListener('keydown', e => { const l=e.key.toUpperCase(); if(/^[A-Z]$/.test(l)) guess(l); });
 
-// Bouton image
+// Bouton image corrigé
 document.getElementById('img-btn').addEventListener('click', function() {
   const n = pickImg();
   const imgEl = document.getElementById('img-el');
   const viewer = document.getElementById('img-viewer');
-  imgEl.onload  = function() { viewer.classList.remove('hidden'); };
-  imgEl.onerror = function() { viewer.classList.remove('hidden'); };
+  
+  // 1. On affiche le conteneur NOIR d'abord (important pour Android)
+  viewer.classList.remove('hidden');
+  
+  // 2. On charge l'image ensuite
   imgEl.src = 'img/' + n + '.jpg';
 });
 
-// Clic/touch sur image → ferme et reprend
-function closeImg() {
-  document.getElementById('img-viewer').classList.add('hidden');
+// On ferme en cliquant sur le FOND (viewer) et non sur l'image elle-même
+document.getElementById('img-viewer').addEventListener('click', function() {
+  this.classList.add('hidden');
   newGame();
-}
-document.getElementById('img-el').addEventListener('click',    closeImg);
-document.getElementById('img-el').addEventListener('touchend', function(e){ e.preventDefault(); closeImg(); });
+});
 
 // Bouton vidéo
 document.getElementById('vid-btn').addEventListener('click', function() {
