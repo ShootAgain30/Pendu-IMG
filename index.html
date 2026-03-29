@@ -871,7 +871,7 @@ document.getElementById('img-btn').addEventListener('click', function() {
 
 function closeImg() {
   document.getElementById('img-viewer').classList.add('hidden');
-  newGame();
+  goToMenu();
 }
 document.getElementById('img-el').addEventListener('click',    closeImg);
 document.getElementById('img-el').addEventListener('touchend', function(e){ e.preventDefault(); closeImg(); });
@@ -891,7 +891,7 @@ function closeVid() {
   vidEl.src = '';
   vidEl.load();
   document.getElementById('vid-viewer').classList.add('hidden');
-  newGame();
+  goToMenu();
 }
 document.getElementById('vid-el').addEventListener('click',    closeVid);
 document.getElementById('vid-el').addEventListener('touchend', function(e){ e.preventDefault(); closeVid(); });
