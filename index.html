@@ -656,7 +656,7 @@ document.getElementById('img-btn').addEventListener('click', function() {
 
 function closeImg() {
   document.getElementById('img-viewer').classList.add('hidden');
-  goToMenu();
+  newGame();
 }
 document.getElementById('img-el').addEventListener('click',    closeImg);
 document.getElementById('img-el').addEventListener('touchend', function(e){ e.preventDefault(); closeImg(); });
@@ -675,7 +675,7 @@ function closeVid() {
   const vidEl = document.getElementById('vid-el');
   vidEl.pause(); vidEl.src=''; vidEl.load();
   document.getElementById('vid-viewer').classList.add('hidden');
-  goToMenu();
+  newGame();
 }
 document.getElementById('vid-el').addEventListener('click',    closeVid);
 document.getElementById('vid-el').addEventListener('touchend', function(e){ e.preventDefault(); closeVid(); });
