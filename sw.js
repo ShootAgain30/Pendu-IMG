@@ -1,5 +1,5 @@
-const CACHE = 'pendu-v2.0.9';
-const FILES = [
+const CACHE = 'pendu-v2.1.1';
+const FILES_CORE = [
   './',
   'index.html',
   'manifest.json',
@@ -16,7 +16,10 @@ const FILES = [
   'img/3.jpg',
   'img/4.jpg',
   'img/5.jpg',
-  'img/6.jpg',
+  'img/6.jpg'
+];
+
+const FILES_EXTRA = [
   'vid/1.mp4',
   'vid/2.mp4',
   'vid/3.mp4',
@@ -28,7 +31,12 @@ const FILES = [
 self.addEventListener('install', function(e) {
   e.waitUntil(
     caches.open(CACHE).then(function(cache) {
-      return cache.addAll(FILES.map(f => new Request(f, { cache: 'reload' })));
+      return cache.addAll(FILES_CORE.map(f => new Request(f, { cache: 'reload' })))
+        .then(function() {
+          FILES_EXTRA.forEach(function(f) {
+            cache.add(new Request(f, { cache: 'reload' })).catch(function(){});
+          });
+        });
     })
   );
   self.skipWaiting();
