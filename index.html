@@ -59,7 +59,7 @@ body::before {
   100% { transform: scaleY(1) translateY(8px); opacity: 0; transform-origin: top; }
 }
 
-/* ── MENU ── */
+  /* ── MENU ── */
 #menu-screen {
   position: fixed; inset: 0; z-index: 200;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -154,8 +154,14 @@ body::before {
   margin-top: 10px; position: relative; z-index: 1;
 }
 .menu-sound-btn:active { transform: scale(0.95); }
+.highscore-bar { position:relative; z-index:1; width:100%; text-align:right; font-family:'DM Mono',monospace; font-size:0.65rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+.highscore-bar span { color:var(--accent); font-size:0.85rem; font-family:'Bebas Neue',sans-serif; letter-spacing:0.1em; }
+.back-menu-btn { background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--muted); font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:0.12em; text-transform:uppercase; padding:6px 12px; border-radius:100px; cursor:pointer; transition:all 0.2s; }
+.back-menu-btn:active { transform:scale(0.95); background:rgba(255,255,255,0.1); }
+.mot-count { font-family:'DM Mono',monospace; font-size:0.65rem; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; }
+.mot-count span { color:var(--accent3); font-family:'Bebas Neue',sans-serif; font-size:0.9rem; }
 
-/* ── JEU ── */
+  /* ── JEU ── */
 .app {
   position: relative; z-index: 1; height: 100dvh;
   display: flex; flex-direction: column; align-items: center;
@@ -241,6 +247,7 @@ body::before {
 <!-- ═══════════ MENU ═══════════ -->
 <div id="menu-screen">
   <div class="menu-bg"></div>
+  <div class="highscore-bar">🏆 High Score&nbsp;: <span id="hs-display">0</span></div>
   <div class="menu-logo">LE PEND<span class="u-sang">U<span class="goutte g1"></span><span class="goutte g2"></span><span class="goutte g3"></span></span></div>
   <div class="menu-gallows">
     <svg width="120" height="90" viewBox="0 0 220 160" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -273,8 +280,12 @@ body::before {
 </div>
 
 <!-- ═══════════ JEU ═══════════ -->
-<div class="app">
+  <div class="app">
   <div class="header">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="back-menu-btn" onclick="goToMenu()">☰</button>
+      <div class="mot-count">Mot <span id="mot-count">1</span></div>
+    </div>
     <span class="diff-badge easy" id="diff-badge">Facile</span>
     <div class="score-badge">
       <span class="score-label">Score</span>
@@ -502,8 +513,7 @@ const WORDS_HARD = [
   { word:"HISTOLOGIQUE",   cat:"Médecine",    hint:"Relatif à l'étude des tissus vivants" },
   { word:"NEUROPLASTICITE",cat:"Médecine",    hint:"Capacité du cerveau à se remodeler" }
 ];
-
-let currentDiff  = 'easy';
+  let currentDiff  = 'easy';
 let hintsEnabled = true;
 
 function setDiff(d) {
@@ -528,15 +538,18 @@ function startGame() {
   else                               pickWord = makeQueue(WORDS_HARD);
   document.getElementById('menu-screen').classList.add('hidden');
   switchToGameMusic();
-  S = 0; winsCount = 0;
+  S = 0; winsCount = 0; motCount = 0;
   document.getElementById('score').textContent = '0';
   newGame();
 }
 
 function goToMenu() {
   stopMotSfx();
+  S = 0; motCount = 0;
   document.getElementById('overlay').classList.add('hidden');
   document.getElementById('menu-screen').classList.remove('hidden');
+  var hs = parseInt(localStorage.getItem('pendu-hs') || '0');
+  document.getElementById('hs-display').textContent = hs;
   switchToMenuMusic();
 }
 
@@ -551,7 +564,7 @@ const pickImg = makeQueue([1,2,3,4,5,6]);
 const pickVid = makeQueue([1,2,3,4,5,6]);
 
 let W, H, C, G, E, O;
-let S = 0, winsCount = 0;
+let S = 0, winsCount = 0, motCount = 0;
 const ROWS  = [['A','Z','E','R','T','Y','U','I','O','P'],['Q','S','D','F','G','H','J','K','L','M'],['W','X','C','V','B','N']];
 const PARTS = ['p-head','p-body','p-larm','p-rarm','p-lleg','p-rleg'];
 const MAX   = 6;
@@ -561,6 +574,8 @@ function newGame() {
   const e = pickWord();
   W=e.word.toUpperCase(); H=e.hint; C=e.cat;
   G=new Set(); E=0; O=false;
+  motCount++;
+  document.getElementById('mot-count').textContent = motCount;
   document.getElementById('overlay').classList.add('hidden');
   document.getElementById('img-btn').classList.add('hidden');
   document.getElementById('vid-btn').classList.add('hidden');
@@ -573,6 +588,8 @@ function guess(l) {
   if (!W.includes(l)) E++;
   if ([...W].every(x => G.has(x))) {
     S += Math.max(10, 50-E*8);
+    var hs = parseInt(localStorage.getItem('pendu-hs') || '0');
+    if (S > hs) localStorage.setItem('pendu-hs', S);
     O=true; winsCount++;
     setTimeout(function(){ end(true); }, 400);
   } else if (E >= MAX) {
@@ -595,6 +612,8 @@ function end(won) {
     ? 'Score\u00A0: <span>+' + Math.max(10,50-E*8) + ' pts</span>'
     : 'Le mot\u00A0était\u00A0: <span>' + W + '</span>';
   document.getElementById('motmagique-gif').classList.add('hidden');
+
+  if (!won) { S = 0; motCount = 0; }
 
   if (won && winsCount % 2 === 0) document.getElementById('img-btn').classList.remove('hidden');
 
@@ -741,6 +760,13 @@ document.getElementById('vid-el').addEventListener('touchend', function(e){ e.pr
   };
 
   updateBtns();
+})();
+
+// ── Pause quand app minimisée ──
+  (function(){
+  var hs = parseInt(localStorage.getItem('pendu-hs') || '0');
+  var el = document.getElementById('hs-display');
+  if (el) el.textContent = hs;
 })();
 </script>
 
